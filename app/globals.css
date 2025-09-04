@@ -1,0 +1,408 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Springz Nutrition Brand Colors */
+  --springz-cream: #F5F1E8; /* Main background cream */
+  --springz-green: #2D5016; /* Primary dark green */
+  --springz-orange: #CC7A00; /* Secondary orange/terracotta */
+  --springz-light-green: #E8F5E8; /* Light green for cards */
+  --springz-light-orange: #FFF3E6; /* Light orange for cards */
+  --springz-light-yellow: #FFFCE6; /* Light yellow for cards */
+
+  /* Updated color tokens to match Springz Nutrition branding */
+  --background: var(--springz-cream); /* Cream background */
+  --foreground: oklch(0.2 0 0); /* Rich dark gray */
+  --card: oklch(1 0 0); /* Pure white for cards */
+  --card-foreground: oklch(0.2 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0 0);
+  
+  /* Springz brand colors */
+  --primary: var(--springz-green); /* Dark forest green */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: var(--springz-orange); /* Orange/terracotta */
+  --secondary-foreground: oklch(1 0 0);
+  
+  --muted: var(--springz-cream); /* Cream for muted areas */
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: var(--springz-green); /* Green accent */
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.55 0.25 15); /* Error red */
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.88 0.02 60); /* Light border with slight warmth */
+  --input: oklch(1 0 0); /* White for inputs */
+  --ring: oklch(0.3 0.1 120 / 0.3); /* Green ring with opacity */
+  
+  /* Chart colors using brand palette */
+  --chart-1: var(--springz-green); /* Dark green */
+  --chart-2: var(--springz-orange); /* Orange */
+  --chart-3: var(--springz-light-green); /* Light green */
+  --chart-4: oklch(0.7 0.1 60); /* Warm gray */
+  --chart-5: oklch(0.4 0.05 120); /* Dark green variant */
+  
+  --radius: 0.75rem;
+  --sidebar: var(--springz-cream);
+  --sidebar-foreground: oklch(0.2 0 0);
+  --sidebar-primary: var(--springz-green);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--springz-orange);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.88 0.02 60);
+  --sidebar-ring: oklch(0.3 0.1 120 / 0.3);
+}
+
+.dark {
+  --background: oklch(0.08 0 0); /* Rich dark */
+  --foreground: oklch(0.98 0 0); /* Off white */
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.08 0 0);
+  --popover-foreground: oklch(0.98 0 0);
+  
+  /* Dark mode brand colors - slightly brighter */
+  --primary: oklch(0.4 0.15 120); /* Brighter green for dark mode */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.6 0.15 40); /* Brighter orange for dark mode */
+  --secondary-foreground: oklch(0.08 0 0);
+  
+  --muted: oklch(0.15 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.4 0.15 120);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.65 0.25 15);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.2 0 0);
+  --input: oklch(0.15 0 0);
+  --ring: oklch(0.4 0.15 120 / 0.4);
+  
+  /* Dark mode chart colors */
+  --chart-1: oklch(0.4 0.15 120);
+  --chart-2: oklch(0.6 0.15 40);
+  --chart-3: oklch(0.5 0.12 120);
+  --chart-4: oklch(0.4 0.05 60);
+  --chart-5: oklch(0.3 0.1 120);
+  
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.4 0.15 120);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.6 0.15 40);
+  --sidebar-accent-foreground: oklch(0.08 0 0);
+  --sidebar-border: oklch(0.2 0 0);
+  --sidebar-ring: oklch(0.4 0.15 120 / 0.4);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom font family variables for Springz Nutrition branding */
+  --font-sans: var(--font-nunito);
+  --font-serif: var(--font-baloo);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Custom Springz brand colors for Tailwind */
+  --color-springz-cream: var(--springz-cream);
+  --color-springz-green: var(--springz-green);
+  --color-springz-orange: var(--springz-orange);
+  --color-springz-light-green: var(--springz-light-green);
+  --color-springz-light-orange: var(--springz-light-orange);
+  --color-springz-light-yellow: var(--springz-light-yellow);
+  
+  /* Additional green shades */
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-200: #bbf7d0;
+  --color-green-300: #86efac;
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: var(--springz-green);
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-green-900: #14532d;
+  --color-green-950: #052e16;
+
+  /* Additional orange shades */
+  --color-orange-50: #fff7ed;
+  --color-orange-100: #ffedd5;
+  --color-orange-200: #fed7aa;
+  --color-orange-300: #fdba74;
+  --color-orange-400: #fb923c;
+  --color-orange-500: #f97316;
+  --color-orange-600: var(--springz-orange);
+  --color-orange-700: #c2410c;
+  --color-orange-800: #9a3412;
+  --color-orange-900: #7c2d12;
+  --color-orange-950: #431407;
+
+  /* Additional yellow shades for sustainable section */
+  --color-yellow-50: #fefce8;
+  --color-yellow-100: #fef3c7;
+  --color-yellow-200: #fde68a;
+  --color-yellow-300: #fcd34d;
+  --color-yellow-400: #fbbf24;
+  --color-yellow-500: #f59e0b;
+  --color-yellow-600: #d97706;
+  --color-yellow-700: #b45309;
+  --color-yellow-800: #92400e;
+  --color-yellow-900: #78350f;
+  --color-yellow-950: #451a03;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom animations */
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+  
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s infinite;
+  }
+  
+  /* Gradient text utilities */
+  .text-gradient-springz {
+    background: linear-gradient(135deg, var(--springz-green), var(--springz-orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Custom button styles matching Springz design */
+  .btn-springz-green {
+    background-color: var(--springz-green);
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .btn-springz-green:hover {
+    background-color: color-mix(in srgb, var(--springz-green) 90%, black);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--springz-green) 30%, transparent);
+  }
+  
+  .btn-springz-orange {
+    background-color: var(--springz-orange);
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .btn-springz-orange:hover {
+    background-color: color-mix(in srgb, var(--springz-orange) 90%, black);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--springz-orange) 30%, transparent);
+  }
+  
+  /* Card hover effects */
+  .card-springz {
+    transition: all 0.3s ease;
+    border-radius: 1rem;
+    background: white;
+    border: 1px solid color-mix(in srgb, var(--springz-green) 10%, transparent);
+  }
+  
+  .card-springz:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px color-mix(in srgb, var(--springz-green) 15%, transparent);
+  }
+  
+  /* Custom scrollbar matching brand colors */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--springz-cream);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--springz-green), var(--springz-orange));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, 
+      color-mix(in srgb, var(--springz-green) 80%, black), 
+      color-mix(in srgb, var(--springz-orange) 80%, black));
+  }
+  
+  /* Focus styles */
+  .focus-springz {
+    outline: 2px solid var(--springz-green);
+    outline-offset: 2px;
+  }
+  
+  /* Springz-specific utility classes */
+  .bg-springz-cream {
+    background-color: var(--springz-cream);
+  }
+  
+  .bg-springz-green {
+    background-color: var(--springz-green);
+  }
+  
+  .bg-springz-orange {
+    background-color: var(--springz-orange);
+  }
+  
+  .text-springz-green {
+    color: var(--springz-green);
+  }
+  
+  .text-springz-orange {
+    color: var(--springz-orange);
+  }
+  
+  .border-springz-green {
+    border-color: var(--springz-green);
+  }
+  
+  .border-springz-orange {
+    border-color: var(--springz-orange);
+  }
+  
+  /* Hover variants */
+  .hover\:bg-springz-green:hover {
+    background-color: var(--springz-green);
+  }
+  
+  .hover\:bg-springz-orange:hover {
+    background-color: var(--springz-orange);
+  }
+  
+  .hover\:text-springz-green:hover {
+    color: var(--springz-green);
+  }
+  
+  .hover\:text-springz-orange:hover {
+    color: var(--springz-orange);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-gentle {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Component-specific styles */
+.hero-springz {
+  background: linear-gradient(135deg, 
+    var(--springz-cream) 0%, 
+    color-mix(in srgb, var(--springz-cream) 95%, var(--springz-green)) 100%);
+}
+
+.section-springz {
+  background: linear-gradient(180deg, 
+    var(--springz-cream) 0%, 
+    white 100%);
+}
+
+/* Product card specific styles */
+.product-card-springz {
+  background: var(--springz-cream);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  border: 1px solid color-mix(in srgb, var(--springz-green) 10%, transparent);
+}
+
+.product-card-springz:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px color-mix(in srgb, var(--springz-green) 15%, transparent);
+}
+
+/* Testimonial card styles */
+.testimonial-card {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--springz-orange) 10%, transparent);
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+  box-shadow: 0 8px 25px color-mix(in srgb, var(--springz-orange) 15%, transparent);
+}

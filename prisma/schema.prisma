@@ -1,0 +1,264 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("CUSTOMER") // "ADMIN" or "CUSTOMER"
+  phone         String?
+  dateOfBirth   DateTime?
+  gender        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  addresses Address[]
+  orders    Order[]
+  reviews   Review[]
+  cartItems CartItem[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  description      String
+  shortDescription String
+  price            Float
+  originalPrice    Float?
+  currency         String   @default("₹")
+  images           String   // JSON string of image URLs
+  categoryId       String
+  category         Category @relation(fields: [categoryId], references: [id])
+  
+  // Nutrition Information
+  servingSize      String
+  protein          String
+  calories         String
+  fats             String
+  carbs            String
+  sugar            String
+  
+  // Additional Info
+  ingredients      String
+  tags             String   // JSON string of tags
+  inStock          Boolean  @default(true)
+  featured         Boolean  @default(false)
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  sizes            ProductSize[]
+  features         ProductFeature[]
+  nutritionFacts   NutritionFact[]
+  howToUse         HowToUse[]
+  sciencePoints    SciencePoint[]
+  faqs             ProductFAQ[]
+  reviews          Review[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+}
+
+model ProductSize {
+  id            String  @id @default(cuid())
+  productId     String
+  product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String
+  price         Float
+  originalPrice Float?
+  available     Boolean @default(true)
+}
+
+model ProductFeature {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  icon        String
+  label       String
+  description String
+}
+
+model NutritionFact {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  value     String
+}
+
+model HowToUse {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  step        Int
+  instruction String
+}
+
+model SciencePoint {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  point     String
+}
+
+model ProductFAQ {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  title     String?
+  comment   String
+  verified  Boolean  @default(false)
+  helpful   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id           String  @id @default(cuid())
+  userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String  // 'shipping' or 'billing'
+  firstName    String
+  lastName     String
+  company      String?
+  address1     String
+  address2     String?
+  city         String
+  state        String
+  postalCode   String
+  country      String  @default("India")
+  phone        String?
+  isDefault    Boolean @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  shippingOrders Order[] @relation("ShippingAddress")
+  billingOrders  Order[] @relation("BillingAddress")
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+  size      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId, size])
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id])
+  orderNumber       String      @unique
+  status            String      @default("PENDING") // PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED, REFUNDED
+  subtotal          Float
+  tax               Float
+  shipping          Float
+  total             Float
+  currency          String      @default("₹")
+  paymentStatus     String      @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  paymentMethod     String?
+  paymentId         String?
+  
+  shippingAddressId String
+  shippingAddress   Address @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  
+  billingAddressId  String
+  billingAddress    Address @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  items             OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  size      String?
+  price     Float
+  name      String
+}
