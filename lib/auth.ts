@@ -5,6 +5,9 @@ import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
+// Define the Role type
+export type Role = 'ADMIN' | 'CUSTOMER'
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   providers: [
@@ -44,7 +47,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           image: user.image,
-          role: user.role,
+          role: user.role as Role,
         }
       }
     })
@@ -55,7 +58,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
+        token.role = user.role as Role
         token.id = user.id
       }
       return token
@@ -63,14 +66,13 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string
-        session.user.role = token.role as string
+        session.user.role = token.role as Role
       }
       return session
     }
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup',
   }
 }
 
@@ -81,12 +83,12 @@ declare module 'next-auth' {
       email: string
       name?: string | null
       image?: string | null
-      role: string
+      role: Role
     }
   }
 
   interface User {
-    role: string
+    role: Role
   }
 }
 

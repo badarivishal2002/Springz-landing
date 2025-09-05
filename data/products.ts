@@ -1,4 +1,4 @@
-// Unified Product Data for Springz Nutrition
+// Real Product Data for Springz Nutrition
 
 export interface Product {
   id: string
@@ -12,7 +12,7 @@ export interface Product {
   rating: number
   reviewCount: number
   images: string[]
-  category: 'plant-protein' | 'functional-foods' | 'high-protein-snacks'
+  category: 'premium-plant-proteins' | 'functional-foods' | 'guilt-free-snacks'
   categoryName: string
   sizes: Array<{
     name: string
@@ -50,93 +50,103 @@ export interface Product {
 }
 
 export const productCategories = {
-  'plant-protein': {
-    name: 'Plant Protein',
-    description: 'Science-grade plant-based proteins with superior amino acid profiles',
+  'premium-plant-proteins': {
+    name: 'Premium Plant Proteins',
+    description: 'High-quality plant-based protein powders for optimal nutrition and muscle building',
     image: '/athletic-person-protein-shake.png'
   },
   'functional-foods': {
     name: 'Functional Foods',
-    description: 'Nutrient-dense functional foods for enhanced performance and recovery',
+    description: 'Nutritionally enhanced foods that provide health benefits beyond basic nutrition',
     image: '/recovery-blend-ingredients.png'
   },
-  'high-protein-snacks': {
-    name: 'High-Protein Snacks',
-    description: 'Convenient, ready-to-eat protein snacks for busy lifestyles',
+  'guilt-free-snacks': {
+    name: 'Guilt-Free Snacks',
+    description: 'Healthy, delicious snacks that satisfy your cravings without compromise',
     image: '/placeholder-wsy0q.png'
   }
 }
 
 export const allProducts: Product[] = [
-  // Plant Protein Category
+  // Premium Plant Proteins
   {
     id: "pp001",
-    name: "Premium Plant Protein",
-    slug: "premium-plant-protein",
-    description: "Clean, high-digestibility plant protein for real-world performance with DIAAS-100% amino acid availability.",
-    shortDescription: "Chocolate flavor, 900g premium plant protein",
-    price: 1499,
-    originalPrice: 1799,
+    name: "Elite Protein",
+    slug: "elite-protein",
+    description: "Our flagship premium plant protein blend, specially formulated with a complete amino acid profile. Made from carefully selected plant sources including pea protein, brown rice protein, and hemp protein. Each serving delivers 25g of high-quality protein to support your fitness goals and overall health.",
+    shortDescription: "Premium plant protein blend with complete amino acid profile - 25g protein per serving",
+    price: 2499,
+    originalPrice: 2999,
     currency: "₹",
-    rating: 4.5,
-    reviewCount: 352,
-    images: ["/native-protein-powder.png", "/placeholder-wsy0q.png"],
-    category: "plant-protein",
-    categoryName: "Plant Protein",
+    rating: 4.8,
+    reviewCount: 247,
+    images: [
+      "/athletic-person-protein-shake.png",
+      "/native-protein-powder.png",
+      "/placeholder-wsy0q.png"
+    ],
+    category: "premium-plant-proteins",
+    categoryName: "Premium Plant Proteins",
     sizes: [
-      { name: "900g", price: 1499, originalPrice: 1799, available: true },
-      { name: "450g", price: 899, originalPrice: 1099, available: true },
-      { name: "1.8kg", price: 2699, originalPrice: 3199, available: false }
+      { name: "900g", price: 2499, originalPrice: 2999, available: true },
+      { name: "1.8kg", price: 4799, originalPrice: 5599, available: true },
+      { name: "450g (Trial)", price: 1399, originalPrice: 1699, available: true }
     ],
     nutrition: {
-      servingSize: "35g",
+      servingSize: "30g",
       protein: "25g",
-      calories: "135",
-      fats: "3.5g",
-      carbs: "6g",
-      sugar: "0.5g"
+      calories: "110",
+      fats: "2.5g",
+      carbs: "3g",
+      sugar: "1g"
     },
     features: [
-      { icon: "diaas", label: "DIAAS 100%", description: "Superior amino acid availability" },
-      { icon: "clean", label: "Clean Label", description: "No artificial additives" },
-      { icon: "sustainable", label: "Sustainable", description: "Eco-friendly sourcing" }
+      { icon: "leaf", label: "100% Plant-Based", description: "Made from premium plant sources only" },
+      { icon: "shield", label: "Complete Amino Profile", description: "All 9 essential amino acids included" },
+      { icon: "check", label: "Easy Digestion", description: "Enhanced with digestive enzymes" },
+      { icon: "star", label: "Premium Quality", description: "Third-party tested for purity" }
     ],
-    ingredients: "Pea Protein Isolate, Brown Rice Protein, Pumpkin Seed Protein, Spirulina",
+    ingredients: "Pea Protein Isolate, Brown Rice Protein, Hemp Protein, Natural Flavors, Stevia Extract, Digestive Enzymes (Protease, Amylase, Lactase)",
     nutritionFacts: [
-      { label: "Serving Size", value: "35g" },
-      { label: "Calories", value: "135" },
-      { label: "Fats", value: "3.5g" },
-      { label: "Carbs", value: "6g" },
-      { label: "Sugar", value: "0.5g" },
-      { label: "Sodium", value: "120mg" },
-      { label: "Fiber", value: "2g" }
+      { label: "Serving Size", value: "30g" },
+      { label: "Calories", value: "110" },
+      { label: "Leucine", value: "2.8g" },
+      { label: "Lysine", value: "2.1g" },
+      { label: "Fiber", value: "2g" },
+      { label: "Iron", value: "4.5mg" },
+      { label: "Calcium", value: "120mg" }
     ],
     howToUse: [
-      "Mix 1 scoop (35g) with 250-300ml of water, milk, or plant-based milk",
-      "Consume post-workout for optimal muscle recovery",
-      "Can also be used as a daily protein supplement between meals"
+      "Add 1 scoop (30g) to 250-300ml of water, plant milk, or your favorite beverage",
+      "Shake vigorously in a shaker bottle or blend for 30-45 seconds",
+      "Best consumed within 30 minutes post-workout or as a meal replacement",
+      "Can be mixed into smoothies, oatmeal, or baked goods for added protein"
     ],
     science: [
-      "DIAAS-100% formulation for superior amino acid availability",
-      "Clinical-grade sourcing with stringent quality control",
-      "Clean-label certified with no artificial colors or preservatives",
-      "Third-party tested for purity and potency"
+      "Clinically proven protein digestibility score of 95%",
+      "Optimal leucine content (2.8g) for muscle protein synthesis",
+      "Enhanced with digestive enzymes for better absorption",
+      "Sustainable sourcing with minimal environmental impact"
     ],
     faqs: [
       {
-        question: "Can I mix this with milk?",
-        answer: "Yes, you can mix this protein powder with milk, water, or your favorite plant-based milk alternative for enhanced taste and nutrition."
+        question: "Is this suitable for vegans?",
+        answer: "Yes, Elite Protein is 100% plant-based and suitable for vegans and vegetarians."
       },
       {
-        question: "Is it lactose-free?",
-        answer: "Yes, this is a 100% plant-based protein that is naturally lactose-free and suitable for vegans and those with lactose intolerance."
+        question: "When is the best time to consume this protein?",
+        answer: "For optimal results, consume within 30 minutes after your workout, or as a meal replacement between meals."
+      },
+      {
+        question: "Does it contain any allergens?",
+        answer: "This product is free from dairy, soy, and gluten. It is manufactured in a facility that may process nuts."
       },
       {
         question: "How does it taste?",
-        answer: "Our chocolate flavor is naturally sweetened and has a smooth, creamy texture that mixes well without being chalky or gritty."
+        answer: "Elite Protein has a smooth, naturally sweet taste thanks to stevia extract. It mixes easily without chalky texture."
       }
     ],
-    tags: ["vegan", "gluten-free", "non-gmo", "sustainable"],
+    tags: ["plant-based", "premium", "complete-protein", "digestive-enzymes", "stevia-sweetened"],
     inStock: true,
     featured: true
   },
@@ -144,565 +154,418 @@ export const allProducts: Product[] = [
     id: "pp002",
     name: "Native Protein Classic",
     slug: "native-protein-classic",
-    description: "Premium whey protein with superior bioavailability for muscle building and recovery.",
-    shortDescription: "Vanilla flavor, 1kg whey protein",
-    price: 1299,
-    originalPrice: 1599,
+    description: "Our classic plant protein formula that started it all. A time-tested blend of pea and rice proteins that provides excellent nutrition for everyday wellness. Perfect for beginners and those seeking a reliable, affordable protein source.",
+    shortDescription: "Classic plant protein blend - reliable nutrition for everyday wellness",
+    price: 1999,
+    originalPrice: 2399,
     currency: "₹",
-    rating: 4.7,
-    reviewCount: 428,
-    images: ["/placeholder-wsy0q.png"],
-    category: "plant-protein",
-    categoryName: "Plant Protein",
+    rating: 4.6,
+    reviewCount: 189,
+    images: [
+      "/native-protein-powder.png",
+      "/placeholder-wsy0q.png"
+    ],
+    category: "premium-plant-proteins",
+    categoryName: "Premium Plant Proteins",
     sizes: [
-      { name: "1kg", price: 1299, originalPrice: 1599, available: true },
-      { name: "2kg", price: 2399, originalPrice: 2999, available: true }
+      { name: "1kg", price: 1999, originalPrice: 2399, available: true },
+      { name: "500g", price: 1199, originalPrice: 1399, available: true }
     ],
     nutrition: {
-      servingSize: "30g",
-      protein: "25g", 
-      calories: "123",
-      fats: "2g",
-      carbs: "4g",
-      sugar: "0g"
-    },
-    features: [
-      { icon: "diaas", label: "DIAAS 100%", description: "Complete amino acid profile" },
-      { icon: "fast", label: "Fast Absorption", description: "Quick muscle recovery" },
-      { icon: "clean", label: "Clean Label", description: "No fillers or additives" }
-    ],
-    ingredients: "Whey Protein Concentrate, Natural Flavors, Stevia Extract",
-    nutritionFacts: [
-      { label: "Serving Size", value: "30g" },
-      { label: "Calories", value: "123" },
-      { label: "Fats", value: "2g" },
-      { label: "Carbs", value: "4g" },
-      { label: "Sugar", value: "0g" },
-      { label: "Sodium", value: "95mg" },
-      { label: "Cholesterol", value: "25mg" }
-    ],
-    howToUse: [
-      "Mix 1 scoop (30g) with 200-250ml of water or milk",
-      "Best consumed within 30 minutes post-workout",
-      "Can be used 1-2 times daily as per protein requirements"
-    ],
-    science: [
-      "Native whey protein for maximum bioavailability",
-      "Cold-processed to preserve protein structure",
-      "Third-party tested for purity and potency",
-      "Fast-digesting for optimal muscle protein synthesis"
-    ],
-    faqs: [
-      {
-        question: "What is Native Whey?",
-        answer: "Native whey is extracted directly from milk rather than being a byproduct of cheese making, resulting in a purer, more bioavailable protein."
-      },
-      {
-        question: "Is this suitable for beginners?",
-        answer: "Yes, this protein is perfect for both beginners and advanced athletes. Start with one scoop daily and adjust as needed."
-      },
-      {
-        question: "Does it mix well?",
-        answer: "Yes, our formula is designed to mix smoothly without clumping when shaken or stirred properly."
-      }
-    ],
-    tags: ["whey", "fast-absorption", "muscle-building"],
-    inStock: true,
-    featured: true
-  },
-  {
-    id: "pp003",
-    name: "Organic Green Protein",
-    slug: "organic-green-protein",
-    description: "Organic plant protein blend with supergreens for complete nutrition.",
-    shortDescription: "Organic blend, 750g with supergreens",
-    price: 1799,
-    originalPrice: 2199,
-    currency: "₹",
-    rating: 4.3,
-    reviewCount: 186,
-    images: ["/placeholder-wsy0q.png"],
-    category: "plant-protein",
-    categoryName: "Plant Protein",
-    sizes: [
-      { name: "750g", price: 1799, originalPrice: 2199, available: true }
-    ],
-    nutrition: {
-      servingSize: "40g",
+      servingSize: "32g",
       protein: "22g",
-      calories: "145",
-      fats: "4g",
-      carbs: "8g",
-      sugar: "1g"
+      calories: "120",
+      fats: "3g",
+      carbs: "4g",
+      sugar: "1.5g"
     },
     features: [
-      { icon: "sustainable", label: "Organic", description: "Certified organic ingredients" },
-      { icon: "clean", label: "Supergreens", description: "20+ organic greens blend" },
-      { icon: "diaas", label: "Antioxidants", description: "Rich in natural antioxidants" }
+      { icon: "heart", label: "Time-Tested Formula", description: "Trusted by thousands of customers" },
+      { icon: "dollar-sign", label: "Great Value", description: "Premium quality at affordable price" },
+      { icon: "smile", label: "Beginner Friendly", description: "Perfect for those new to plant proteins" }
     ],
-    ingredients: "Organic Pea Protein, Spirulina, Chlorella, Spinach Powder, Kale Powder",
+    ingredients: "Pea Protein, Brown Rice Protein, Natural Vanilla Flavor, Stevia Extract, Sunflower Lecithin",
     nutritionFacts: [
-      { label: "Serving Size", value: "40g" },
-      { label: "Calories", value: "145" },
-      { label: "Fats", value: "4g" },
-      { label: "Carbs", value: "8g" },
-      { label: "Sugar", value: "1g" },
-      { label: "Fiber", value: "3g" },
-      { label: "Iron", value: "5mg" }
+      { label: "Serving Size", value: "32g" },
+      { label: "Calories", value: "120" },
+      { label: "Leucine", value: "2.2g" },
+      { label: "Lysine", value: "1.8g" },
+      { label: "Fiber", value: "1.5g" },
+      { label: "Sodium", value: "180mg" }
     ],
     howToUse: [
-      "Mix 1 scoop (40g) with 300ml of water or plant milk",
-      "Best consumed in the morning or post-workout",
-      "Can be blended into smoothies for enhanced nutrition"
+      "Mix 1 scoop (32g) with 250ml of water or plant milk",
+      "Shake well and consume post-workout or between meals",
+      "Can be used 1-2 times daily as needed"
     ],
     science: [
-      "Certified organic by leading certification bodies",
-      "Contains 20+ organic vegetables and supergreens",
-      "Rich in chlorophyll and natural antioxidants",
-      "Supports overall health and immune function"
+      "Balanced amino acid profile from pea and rice protein combination",
+      "Easily digestible plant-based protein sources",
+      "No artificial colors or preservatives"
     ],
     faqs: [
       {
-        question: "What makes this organic?",
-        answer: "All ingredients are certified organic, grown without pesticides, herbicides, or synthetic fertilizers."
+        question: "What makes this different from Elite Protein?",
+        answer: "Native Protein Classic is our foundational formula with excellent value, while Elite Protein has enhanced features like digestive enzymes and premium sourcing."
       },
       {
-        question: "Can I taste the greens?",
-        answer: "The natural flavor is mild and earthy. It blends well with fruits in smoothies to mask any vegetable taste."
-      },
-      {
-        question: "Is it suitable for detox?",
-        answer: "Yes, the organic greens and antioxidants support natural detoxification processes in the body."
+        question: "Is it suitable for weight loss?",
+        answer: "Yes, the high protein content helps maintain muscle mass during weight loss and increases satiety."
       }
     ],
-    tags: ["organic", "vegan", "supergreens", "antioxidants"],
+    tags: ["plant-based", "classic", "affordable", "beginner-friendly"],
     inStock: true,
     featured: false
   },
-
-  // Functional Foods Category
   {
-    id: "ff001",
-    name: "Peanut Butter Powder",
-    slug: "peanut-butter-powder",
-    description: "High-protein, low-fat peanut butter powder perfect for smoothies and baking.",
-    shortDescription: "Natural protein boost, 400g powder",
-    price: 899,
-    originalPrice: 1099,
+    id: "pp003",
+    name: "Native Protein Chocolate",
+    slug: "native-protein-chocolate",
+    description: "Indulge in the rich, decadent taste of chocolate while fueling your body with premium plant protein. Our chocolate variant combines the same high-quality protein blend with natural cocoa for a delicious treat that supports your fitness goals.",
+    shortDescription: "Rich chocolate flavored plant protein - indulgent taste, premium nutrition",
+    price: 2199,
+    originalPrice: 2599,
     currency: "₹",
-    rating: 4.6,
-    reviewCount: 243,
-    images: ["/placeholder-wsy0q.png"],
-    category: "functional-foods",
-    categoryName: "Functional Foods",
+    rating: 4.7,
+    reviewCount: 156,
+    images: [
+      "/native-protein-powder.png",
+      "/placeholder-wsy0q.png"
+    ],
+    category: "premium-plant-proteins",
+    categoryName: "Premium Plant Proteins",
     sizes: [
-      { name: "400g", price: 899, originalPrice: 1099, available: true },
-      { name: "800g", price: 1599, originalPrice: 1999, available: true }
+      { name: "1kg", price: 2199, originalPrice: 2599, available: true },
+      { name: "2kg", price: 4199, originalPrice: 4899, available: true }
     ],
     nutrition: {
-      servingSize: "25g",
-      protein: "12g",
-      calories: "95",
-      fats: "3g",
-      carbs: "6g",
+      servingSize: "33g",
+      protein: "23g",
+      calories: "125",
+      fats: "3.5g",
+      carbs: "5g",
       sugar: "2g"
     },
     features: [
-      { icon: "clean", label: "Low Fat", description: "85% less fat than regular peanut butter" },
-      { icon: "diaas", label: "High Protein", description: "12g protein per serving" },
-      { icon: "sustainable", label: "Natural", description: "No artificial preservatives" }
+      { icon: "coffee", label: "Real Cocoa", description: "Made with natural cocoa powder" },
+      { icon: "smile", label: "Indulgent Taste", description: "Rich chocolate flavor you will love" },
+      { icon: "zap", label: "Natural Energy", description: "Cocoa provides gentle natural energy boost" }
     ],
-    ingredients: "Defatted Peanut Flour, Natural Flavors, Sea Salt",
+    ingredients: "Pea Protein, Brown Rice Protein, Natural Cocoa Powder, Natural Chocolate Flavor, Stevia Extract, Xanthan Gum",
     nutritionFacts: [
-      { label: "Serving Size", value: "25g" },
-      { label: "Calories", value: "95" },
-      { label: "Fats", value: "3g" },
-      { label: "Carbs", value: "6g" },
-      { label: "Sugar", value: "2g" },
-      { label: "Sodium", value: "180mg" },
-      { label: "Potassium", value: "240mg" }
+      { label: "Serving Size", value: "33g" },
+      { label: "Calories", value: "125" },
+      { label: "Protein", value: "23g" },
+      { label: "Fats", value: "3.5g" },
+      { label: "Carbs", value: "5g" },
+      { label: "Sugar", value: "2g" }
     ],
     howToUse: [
-      "Mix 2-3 tablespoons with water to make peanut butter spread",
-      "Add to smoothies, oatmeal, or yogurt for extra protein",
-      "Use in baking recipes as a healthy flour substitute"
+      "Mix 1 scoop (33g) with 250-300ml of water or plant milk",
+      "Perfect for post-workout recovery or as a healthy dessert alternative",
+      "Can be blended with banana and ice for a delicious chocolate smoothie"
     ],
     science: [
-      "Defatted through natural pressing process",
-      "Retains natural peanut flavor and nutrients",
-      "High protein content supports muscle maintenance",
-      "Versatile ingredient for multiple culinary applications"
+      "Natural cocoa provides antioxidants and flavonoids",
+      "Premium plant protein blend for muscle recovery",
+      "Low sugar content with natural sweeteners"
     ],
     faqs: [
       {
-        question: "How do I reconstitute it?",
-        answer: "Mix 2 parts powder with 1 part water to create a paste consistency similar to regular peanut butter."
+        question: "Does it taste like real chocolate?",
+        answer: "Yes! We use natural cocoa powder to give it an authentic, rich chocolate flavor without artificial additives."
       },
       {
-        question: "Does it taste like peanut butter?",
-        answer: "Yes, it retains the authentic peanut flavor but with a slightly lighter taste due to reduced fat content."
-      },
-      {
-        question: "Can I use it in baking?",
-        answer: "Absolutely! It's perfect for protein pancakes, muffins, and energy balls. Use it to replace some flour in recipes."
+        question: "Can I use this for baking?",
+        answer: "Absolutely! It's perfect for protein pancakes, muffins, and chocolate protein brownies."
       }
     ],
-    tags: ["natural", "low-fat", "versatile", "protein-rich"],
+    tags: ["plant-based", "chocolate", "natural-cocoa", "indulgent"],
+    inStock: true,
+    featured: true
+  },
+
+  // Functional Foods
+  {
+    id: "ff001",
+    name: "Nuchhi-Nunde",
+    slug: "nuchhi-nunde",
+    description: "A traditional South Indian superfood blend reimagined for modern nutrition. Nuchhi-Nunde combines ancient grains, lentils, and spices in a convenient powder form. Rich in protein, fiber, and essential nutrients, this functional food supports digestive health and provides sustained energy.",
+    shortDescription: "Traditional South Indian superfood blend - ancient nutrition, modern convenience",
+    price: 899,
+    originalPrice: 1099,
+    currency: "₹",
+    rating: 4.5,
+    reviewCount: 78,
+    images: [
+      "/recovery-blend-ingredients.png",
+      "/placeholder-wsy0q.png"
+    ],
+    category: "functional-foods",
+    categoryName: "Functional Foods",
+    sizes: [
+      { name: "500g", price: 899, originalPrice: 1099, available: true },
+      { name: "1kg", price: 1699, originalPrice: 1999, available: true }
+    ],
+    nutrition: {
+      servingSize: "25g",
+      protein: "8g",
+      calories: "95",
+      fats: "2g",
+      carbs: "15g",
+      sugar: "3g"
+    },
+    features: [
+      { icon: "globe", label: "Traditional Recipe", description: "Authentic South Indian superfood formula" },
+      { icon: "heart", label: "Digestive Support", description: "Promotes healthy digestion naturally" },
+      { icon: "clock", label: "Sustained Energy", description: "Complex carbs for lasting energy" }
+    ],
+    ingredients: "Finger Millet (Ragi), Black Gram, Green Gram, Rice, Fenugreek Seeds, Turmeric, Asafoetida, Rock Salt",
+    nutritionFacts: [
+      { label: "Serving Size", value: "25g" },
+      { label: "Calories", value: "95" },
+      { label: "Dietary Fiber", value: "4g" },
+      { label: "Iron", value: "3.2mg" },
+      { label: "Calcium", value: "85mg" },
+      { label: "Magnesium", value: "45mg" }
+    ],
+    howToUse: [
+      "Mix 2-3 tablespoons (25g) with warm water or milk",
+      "Stir well to avoid lumps, add jaggery or honey if desired",
+      "Best consumed in the morning or as an evening snack",
+      "Can be made into porridge or added to smoothies"
+    ],
+    science: [
+      "Rich in prebiotics that support gut microbiome health",
+      "Contains complete proteins from legume and grain combination",
+      "High in soluble fiber for cholesterol management",
+      "Ancient grains provide sustained release of energy"
+    ],
+    faqs: [
+      {
+        question: "What is Nuchhi-Nunde?",
+        answer: "Nuchhi-Nunde is a traditional South Indian health food made from roasted grains, lentils, and spices. It's been used for generations for its nutritional and digestive benefits."
+      },
+      {
+        question: "How does it help with digestion?",
+        answer: "The combination of spices like fenugreek and asafoetida, along with fiber-rich grains, naturally supports healthy digestion and gut health."
+      }
+    ],
+    tags: ["traditional", "south-indian", "superfood", "digestive-health", "ancient-grains"],
     inStock: true,
     featured: true
   },
   {
     id: "ff002",
-    name: "Recovery Blend Plus",
-    slug: "recovery-blend-plus",
-    description: "Advanced post-workout recovery formula with protein, BCAAs, and electrolytes.",
-    shortDescription: "Post-workout recovery, 500g blend",
-    price: 1799,
-    originalPrice: 2199,
+    name: "Native Protein Peanut Butter Powder Sweetened",
+    slug: "native-protein-peanut-butter-powder-sweetened",
+    description: "All the delicious taste of peanut butter with added plant protein and reduced fat. Our sweetened peanut butter powder is perfect for smoothies, baking, or making instant peanut butter. Naturally sweetened with stevia for guilt-free indulgence.",
+    shortDescription: "Protein-enhanced peanut butter powder - all the taste, less fat, more protein",
+    price: 799,
+    originalPrice: 999,
     currency: "₹",
     rating: 4.4,
-    reviewCount: 167,
-    images: ["/recovery-blend-ingredients.png"],
+    reviewCount: 92,
+    images: [
+      "/placeholder-wsy0q.png",
+      "/recovery-blend-ingredients.png"
+    ],
     category: "functional-foods",
     categoryName: "Functional Foods",
     sizes: [
-      { name: "500g", price: 1799, originalPrice: 2199, available: true }
+      { name: "400g", price: 799, originalPrice: 999, available: true },
+      { name: "800g", price: 1499, originalPrice: 1799, available: true }
     ],
     nutrition: {
-      servingSize: "30g",
-      protein: "18g",
-      calories: "120",
-      fats: "2g",
-      carbs: "8g",
-      sugar: "3g"
-    },
-    features: [
-      { icon: "fast", label: "Fast Recovery", description: "Optimized for post-workout recovery" },
-      { icon: "diaas", label: "BCAAs", description: "Essential amino acids for muscle repair" },
-      { icon: "clean", label: "Electrolytes", description: "Replenishes lost minerals" }
-    ],
-    ingredients: "Whey Protein Isolate, BCAAs, Creatine, Electrolyte Blend, Natural Flavors",
-    nutritionFacts: [
-      { label: "Serving Size", value: "30g" },
-      { label: "Calories", value: "120" },
-      { label: "Fats", value: "2g" },
-      { label: "Carbs", value: "8g" },
-      { label: "Sugar", value: "3g" },
-      { label: "BCAAs", value: "5g" },
-      { label: "Creatine", value: "2g" }
-    ],
-    howToUse: [
-      "Mix 1 scoop (30g) with 300ml of cold water",
-      "Consume within 30 minutes after workout",
-      "Can be used on training days for optimal recovery"
-    ],
-    science: [
-      "Scientifically formulated with optimal BCAA ratio (2:1:1)",
-      "Contains creatine monohydrate for strength and power",
-      "Electrolyte blend helps maintain hydration balance",
-      "Fast-absorbing protein for immediate muscle recovery"
-    ],
-    faqs: [
-      {
-        question: "When should I take this?",
-        answer: "Best consumed within 30 minutes post-workout when your muscles are most receptive to nutrients."
-      },
-      {
-        question: "Can I take it on rest days?",
-        answer: "While designed for post-workout use, it can be consumed on rest days to support ongoing recovery processes."
-      },
-      {
-        question: "Does it contain caffeine?",
-        answer: "No, this formula is caffeine-free and can be consumed any time without affecting sleep."
-      }
-    ],
-    tags: ["recovery", "bcaa", "electrolytes", "post-workout"],
-    inStock: true,
-    featured: true
-  },
-  {
-    id: "ff003",
-    name: "Greens Super Powder",
-    slug: "greens-super-powder",
-    description: "Nutrient-dense superfood blend with 20+ organic greens and vegetables.",
-    shortDescription: "Superfood blend, 300g with 20+ greens",
-    price: 1399,
-    originalPrice: 1699,
-    currency: "₹",
-    rating: 4.2,
-    reviewCount: 134,
-    images: ["/placeholder-wsy0q.png"],
-    category: "functional-foods",
-    categoryName: "Functional Foods",
-    sizes: [
-      { name: "300g", price: 1399, originalPrice: 1699, available: true }
-    ],
-    nutrition: {
-      servingSize: "10g",
-      protein: "3g",
-      calories: "35",
-      fats: "0.5g",
+      servingSize: "20g",
+      protein: "12g",
+      calories: "85",
+      fats: "3g",
       carbs: "6g",
       sugar: "2g"
     },
     features: [
-      { icon: "sustainable", label: "20+ Greens", description: "Comprehensive vegetable blend" },
-      { icon: "diaas", label: "Antioxidants", description: "Rich in natural antioxidants" },
-      { icon: "clean", label: "Vitamins", description: "Natural vitamins and minerals" }
+      { icon: "zap", label: "Protein Boost", description: "12g protein per serving" },
+      { icon: "droplet", label: "Low Fat", description: "75% less fat than regular peanut butter" },
+      { icon: "chef-hat", label: "Versatile Use", description: "Perfect for baking, smoothies, and more" }
     ],
-    ingredients: "Spinach, Kale, Spirulina, Chlorella, Broccoli, and 15+ organic greens",
+    ingredients: "Peanut Powder (85%), Pea Protein Isolate, Stevia Extract, Natural Peanut Flavor, Sea Salt",
     nutritionFacts: [
-      { label: "Serving Size", value: "10g" },
-      { label: "Calories", value: "35" },
-      { label: "Fats", value: "0.5g" },
+      { label: "Serving Size", value: "20g" },
+      { label: "Calories", value: "85" },
+      { label: "Protein", value: "12g" },
+      { label: "Fats", value: "3g" },
       { label: "Carbs", value: "6g" },
-      { label: "Sugar", value: "2g" },
-      { label: "Fiber", value: "2g" },
-      { label: "Vitamin A", value: "2500 IU" }
+      { label: "Sodium", value: "150mg" }
     ],
     howToUse: [
-      "Mix 1 scoop (10g) with 200ml of water or juice",
-      "Best consumed in the morning on empty stomach",
-      "Can be added to smoothies for enhanced nutrition"
+      "Mix 2 tablespoons powder with 1 tablespoon water to make peanut butter spread",
+      "Add to smoothies, oatmeal, or yogurt for extra protein and flavor",
+      "Use in baking recipes as a healthy ingredient replacement",
+      "Perfect for protein pancakes and energy balls"
     ],
     science: [
-      "Contains over 20 certified organic vegetables and greens",
-      "Rich in chlorophyll and natural antioxidants",
-      "Provides essential vitamins and minerals",
-      "Supports alkaline pH balance in the body"
+      "Defatted through natural pressing process to reduce calories",
+      "Enhanced with plant protein for better nutritional profile",
+      "Contains healthy peanut nutrients including vitamin E and niacin",
+      "Natural stevia sweetening without added sugars"
     ],
     faqs: [
       {
-        question: "Does it taste good?",
-        answer: "The natural taste is earthy and mild. We recommend mixing with fruit juice or adding to smoothies for better taste."
+        question: "How do I make peanut butter from this powder?",
+        answer: "Simply mix 2 parts powder with 1 part water and stir until you get your desired consistency. You can add more water for a thinner consistency."
       },
       {
-        question: "Can it replace vegetables?",
-        answer: "While it's a great supplement, it's designed to complement, not replace, a diet rich in whole vegetables."
-      },
-      {
-        question: "Is it suitable for detox?",
-        answer: "Yes, the blend of greens and antioxidants supports the body's natural detoxification processes."
+        question: "Is this healthier than regular peanut butter?",
+        answer: "Yes, it has 75% less fat and significantly more protein per serving compared to regular peanut butter, making it a healthier choice."
       }
     ],
-    tags: ["superfood", "organic", "vitamins", "minerals"],
+    tags: ["peanut-butter", "protein-enhanced", "low-fat", "sweetened", "versatile"],
+    inStock: true,
+    featured: false
+  },
+  {
+    id: "ff003",
+    name: "Native Protein Peanut Butter Powder Hot and Spicy",
+    slug: "native-protein-peanut-butter-powder-hot-spicy",
+    description: "For those who love a kick in their nutrition! Our hot and spicy peanut butter powder combines the protein benefits of our classic formula with a blend of carefully selected spices. Perfect for adding excitement to your protein routine.",
+    shortDescription: "Spicy protein peanut butter powder - heat up your nutrition game",
+    price: 849,
+    originalPrice: 1049,
+    currency: "₹",
+    rating: 4.3,
+    reviewCount: 45,
+    images: [
+      "/placeholder-wsy0q.png",
+      "/recovery-blend-ingredients.png"
+    ],
+    category: "functional-foods",
+    categoryName: "Functional Foods",
+    sizes: [
+      { name: "400g", price: 849, originalPrice: 1049, available: true }
+    ],
+    nutrition: {
+      servingSize: "20g",
+      protein: "12g",
+      calories: "88",
+      fats: "3.5g",
+      carbs: "5g",
+      sugar: "1g"
+    },
+    features: [
+      { icon: "flame", label: "Spicy Kick", description: "Perfect blend of heat and flavor" },
+      { icon: "zap", label: "Metabolism Boost", description: "Spices may help boost metabolism" },
+      { icon: "star", label: "Unique Flavor", description: "One-of-a-kind taste experience" }
+    ],
+    ingredients: "Peanut Powder (80%), Pea Protein Isolate, Chili Powder, Paprika, Cumin, Black Pepper, Garlic Powder, Sea Salt",
+    nutritionFacts: [
+      { label: "Serving Size", value: "20g" },
+      { label: "Calories", value: "88" },
+      { label: "Protein", value: "12g" },
+      { label: "Fats", value: "3.5g" },
+      { label: "Carbs", value: "5g" },
+      { label: "Capsaicin", value: "2mg" }
+    ],
+    howToUse: [
+      "Mix with water to create a spicy peanut butter spread",
+      "Add to savory smoothies for a protein and spice boost",
+      "Use as a seasoning powder for roasted vegetables or snacks",
+      "Perfect for making spicy protein energy balls"
+    ],
+    science: [
+      "Capsaicin from chili may boost metabolism and fat burning",
+      "Spices provide anti-inflammatory compounds",
+      "High protein content supports muscle maintenance",
+      "Unique flavor profile encourages varied nutrition"
+    ],
+    faqs: [
+      {
+        question: "How spicy is this product?",
+        answer: "It has a moderate spice level - flavorful with a gentle heat that most people can enjoy. It's not overwhelmingly hot."
+      },
+      {
+        question: "Can I use this in sweet recipes?",
+        answer: "While it's designed for savory applications, some customers enjoy the unique flavor in spicy-sweet combinations like chocolate chili energy balls."
+      }
+    ],
+    tags: ["peanut-butter", "spicy", "protein-enhanced", "unique-flavor", "indian-spices"],
     inStock: true,
     featured: false
   },
 
-  // High-Protein Snacks Category  
+  // Guilt-Free Snacks
   {
-    id: "hps001",
-    name: "High Protein Kodubale",
-    slug: "high-protein-kodubale",
-    description: "Traditional South Indian snack enriched with plant protein for guilt-free indulgence.",
-    shortDescription: "Ready to eat, 200g protein snack",
+    id: "gfs001",
+    name: "Kodubale",
+    slug: "kodubale",
+    description: "Traditional South Indian ring-shaped snacks made healthier! Our Kodubale are baked, not fried, and made with wholesome ingredients including lentil flour and aromatic spices. A perfect guilt-free snack that satisfies your cravings while providing good nutrition.",
+    shortDescription: "Healthy South Indian ring snacks - traditional taste, modern nutrition",
     price: 299,
     originalPrice: 399,
     currency: "₹",
-    rating: 4.8,
-    reviewCount: 89,
-    images: ["/placeholder-wsy0q.png"],
-    category: "high-protein-snacks",
-    categoryName: "High-Protein Snacks",
+    rating: 4.6,
+    reviewCount: 127,
+    images: [
+      "/placeholder-wsy0q.png",
+      "/placeholder-te1mw.png"
+    ],
+    category: "guilt-free-snacks",
+    categoryName: "Guilt-Free Snacks",
     sizes: [
       { name: "200g", price: 299, originalPrice: 399, available: true },
-      { name: "500g", price: 699, originalPrice: 899, available: true }
-    ],
-    nutrition: {
-      servingSize: "50g",
-      protein: "10g",
-      calories: "180",
-      fats: "8g",
-      carbs: "18g",
-      sugar: "2g"
-    },
-    features: [
-      { icon: "protein", label: "10g Protein", description: "High protein content per serving" },
-      { icon: "traditional", label: "Traditional", description: "Authentic South Indian recipe" },
-      { icon: "crunchy", label: "Crunchy", description: "Satisfying crispy texture" },
-      { icon: "ready", label: "Ready to Eat", description: "Convenient snacking option" }
-    ],
-    ingredients: "Rice Flour, Chickpea Flour, Pea Protein, Spices, Sunflower Oil",
-    nutritionFacts: [
-      { label: "Serving Size", value: "50g" },
-      { label: "Calories", value: "180" },
-      { label: "Fats", value: "8g" },
-      { label: "Carbs", value: "18g" },
-      { label: "Sugar", value: "2g" },
-      { label: "Sodium", value: "320mg" },
-      { label: "Fiber", value: "3g" }
-    ],
-    howToUse: [
-      "Enjoy directly as a healthy snack",
-      "Perfect with evening tea or coffee",
-      "Store in airtight container for freshness"
-    ],
-    science: [
-      "Traditional recipe enhanced with plant protein",
-      "Baked using traditional methods for authentic taste",
-      "Fortified with pea protein for added nutrition",
-      "Quality ingredients sourced from local farmers"
-    ],
-    faqs: [
-      {
-        question: "How much protein does this provide?",
-        answer: "Each 50g serving provides 10g of high-quality protein to support your fitness goals."
-      },
-      {
-        question: "Is this suitable for vegetarians?",
-        answer: "Yes, this is completely vegetarian and made with plant-based protein."
-      },
-      {
-        question: "How long does it stay fresh?",
-        answer: "When stored in an airtight container, it stays fresh for up to 3 months."
-      }
-    ],
-    tags: ["traditional", "crunchy", "ready-to-eat", "south-indian"],
-    inStock: true,
-    featured: true
-  },
-  {
-    id: "hps002", 
-    name: "Protein Energy Bars",
-    slug: "protein-energy-bars",
-    description: "Delicious protein bars packed with nuts, seeds, and natural protein for sustained energy.",
-    shortDescription: "Mixed flavors, pack of 6 bars",
-    price: 499,
-    originalPrice: 599,
-    currency: "₹",
-    rating: 4.5,
-    reviewCount: 156,
-    images: ["/placeholder-wsy0q.png"],
-    category: "high-protein-snacks",
-    categoryName: "High-Protein Snacks",
-    sizes: [
-      { name: "6 Bars", price: 499, originalPrice: 599, available: true },
-      { name: "12 Bars", price: 899, originalPrice: 1099, available: true }
-    ],
-    nutrition: {
-      servingSize: "1 bar (45g)",
-      protein: "12g",
-      calories: "210",
-      fats: "9g",
-      carbs: "20g",
-      sugar: "8g"
-    },
-    features: [
-      { icon: "protein", label: "12g Protein", description: "High protein content per bar" },
-      { icon: "natural", label: "Natural", description: "Made with natural ingredients" },
-      { icon: "clean", label: "No Artificial Colors", description: "Free from artificial additives" },
-      { icon: "energy", label: "Sustained Energy", description: "Long-lasting energy boost" }
-    ],
-    ingredients: "Dates, Almonds, Whey Protein, Peanut Butter, Dark Chocolate, Chia Seeds",
-    nutritionFacts: [
-      { label: "Serving Size", value: "1 bar (45g)" },
-      { label: "Calories", value: "210" },
-      { label: "Fats", value: "9g" },
-      { label: "Carbs", value: "20g" },
-      { label: "Sugar", value: "8g" },
-      { label: "Fiber", value: "4g" },
-      { label: "Calcium", value: "80mg" }
-    ],
-    howToUse: [
-      "Perfect pre or post-workout snack",
-      "Great for on-the-go energy boost",
-      "Store in cool, dry place for best taste"
-    ],
-    science: [
-      "Balanced macronutrient profile for sustained energy",
-      "Natural ingredients provide slow-release carbohydrates",
-      "Whey protein supports muscle recovery and growth",
-      "Antioxidants from dark chocolate and nuts"
-    ],
-    faqs: [
-      {
-        question: "Are these bars suitable for diabetics?",
-        answer: "These bars contain natural sugars from dates. Please consult your doctor before consuming if you have diabetes."
-      },
-      {
-        question: "Can I eat this as a meal replacement?",
-        answer: "While nutritious, these are designed as snacks. For meal replacement, combine with fruits or yogurt."
-      },
-      {
-        question: "Do they contain gluten?",
-        answer: "Our bars are gluten-free, but manufactured in facilities that may process gluten-containing ingredients."
-      }
-    ],
-    tags: ["natural", "nuts", "energy", "convenient"],
-    inStock: true,
-    featured: true
-  },
-  {
-    id: "hps003",
-    name: "Roasted Protein Mix",
-    slug: "roasted-protein-mix",
-    description: "Crunchy mix of protein-rich nuts, seeds, and legumes for healthy snacking.",
-    shortDescription: "Roasted mix, 250g premium blend",
-    price: 399,
-    originalPrice: 499,
-    currency: "₹",
-    rating: 4.3,
-    reviewCount: 78,
-    images: ["/placeholder-wsy0q.png"],
-    category: "high-protein-snacks",
-    categoryName: "High-Protein Snacks",
-    sizes: [
-      { name: "250g", price: 399, originalPrice: 499, available: true },
-      { name: "500g", price: 699, originalPrice: 899, available: true }
+      { name: "400g", price: 549, originalPrice: 699, available: true }
     ],
     nutrition: {
       servingSize: "30g",
-      protein: "8g",
-      calories: "160",
-      fats: "12g",
-      carbs: "8g",
+      protein: "6g",
+      calories: "135",
+      fats: "4g",
+      carbs: "20g",
       sugar: "1g"
     },
     features: [
-      { icon: "protein", label: "8g Protein", description: "Quality protein from nuts and seeds" },
-      { icon: "roasted", label: "Roasted", description: "Perfectly roasted for flavor" },
-      { icon: "clean", label: "No Preservatives", description: "Natural preservation methods" },
-      { icon: "healthy", label: "Healthy Fats", description: "Rich in beneficial fats" }
+      { icon: "heart", label: "Baked Not Fried", description: "Healthier cooking method" },
+      { icon: "wheat", label: "Lentil Based", description: "Good source of plant protein" },
+      { icon: "clock", label: "Traditional Recipe", description: "Authentic South Indian taste" }
     ],
-    ingredients: "Almonds, Cashews, Pumpkin Seeds, Chickpeas, Edamame, Sea Salt, Spices",
+    ingredients: "Black Gram Flour, Rice Flour, Cumin Seeds, Sesame Seeds, Asafoetida, Turmeric, Curry Leaves, Coconut Oil, Rock Salt",
     nutritionFacts: [
       { label: "Serving Size", value: "30g" },
-      { label: "Calories", value: "160" },
-      { label: "Fats", value: "12g" },
-      { label: "Carbs", value: "8g" },
-      { label: "Sugar", value: "1g" },
-      { label: "Fiber", value: "3g" },
-      { label: "Vitamin E", value: "4mg" }
+      { label: "Calories", value: "135" },
+      { label: "Dietary Fiber", value: "3g" },
+      { label: "Iron", value: "2.1mg" },
+      { label: "Folate", value: "45mcg" },
+      { label: "Magnesium", value: "28mg" }
     ],
     howToUse: [
-      "Enjoy as a healthy snack between meals",
-      "Perfect addition to salads or yogurt",
-      "Store in airtight container after opening"
+      "Enjoy straight from the pack as a healthy snack",
+      "Perfect with evening tea or coffee",
+      "Can be crushed and used as a crunchy topping for salads",
+      "Store in airtight container for maximum freshness"
     ],
     science: [
-      "Slow-roasted to preserve nutrients and enhance flavor",
-      "Combination of nuts and seeds provides complete amino acids",
-      "Rich in healthy fats, fiber, and plant-based protein",
-      "Natural source of vitamin E and essential minerals"
+      "High in plant-based protein from black gram flour",
+      "Rich in dietary fiber for digestive health",
+      "Contains beneficial spices with anti-inflammatory properties",
+      "Baked processing retains more nutrients than frying"
     ],
     faqs: [
       {
-        question: "Are these suitable for nut allergies?",
-        answer: "This mix contains tree nuts. Please avoid if you have nut allergies."
+        question: "What makes these different from regular kodubale?",
+        answer: "Our kodubale are baked instead of fried, making them lower in unhealthy fats while retaining the authentic taste and adding nutritional benefits."
       },
       {
-        question: "How should I store this mix?",
-        answer: "Store in an airtight container in a cool, dry place. Consume within 6 months for best quality."
+        question: "Are these suitable for kids?",
+        answer: "Yes! They're a healthy snack option for children, providing protein and essential nutrients without excessive oil or artificial additives."
       },
       {
-        question: "Can children eat this?",
-        answer: "Yes, it's a healthy snack for children over 3 years old, but supervise due to choking hazard from nuts."
+        question: "How long do they stay fresh?",
+        answer: "When stored in an airtight container, they maintain their crispiness and flavor for up to 3 months."
       }
     ],
-    tags: ["roasted", "nuts", "seeds", "healthy-fats"],
+    tags: ["south-indian", "traditional", "baked", "lentil-based", "crunchy"],
     inStock: true,
-    featured: false
+    featured: true
   }
 ]
 

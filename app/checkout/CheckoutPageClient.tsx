@@ -1,116 +1,279 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ArrowLeft, CreditCard, Truck, Shield, CheckCircle, Loader2 } from "lucide-react"
+import { 
+  ArrowLeft, 
+  Loader2, 
+  Shield, 
+  RotateCcw, 
+  Award,
+  Check,
+  Plus,
+  Minus,
+  X
+} from "lucide-react"
 import Link from "next/link"
-import { useAuth } from "@/hooks/useAuth"
-import { cartApi, orderApi } from "@/lib/api"
-import type { Cart, CheckoutForm } from "@/lib/types"
+import { formatINR } from "@/lib/currency"
+
+interface CartItem {
+  id: string
+  quantity: number
+  size: string | null
+  product: {
+    id: string
+    name: string
+    slug: string
+    price: number
+    originalPrice?: number
+    images: string[]
+    inStock: boolean
+    category: {
+      name: string
+    }
+  }
+  subtotal: number
+}
+
+interface Cart {
+  items: CartItem[]
+  summary: {
+    itemCount: number
+    subtotal: number
+    shippingCost: number
+    shippingThreshold: number
+    tax: number
+    taxRate: number
+    total: number
+  }
+}
+
+const steps = [
+  { id: 'cart', label: 'Cart', completed: true },
+  { id: 'information', label: 'Information', completed: false },
+  { id: 'address', label: 'Address', completed: false },
+  { id: 'delivery', label: 'Delivery', completed: false },
+  { id: 'payment', label: 'Payment', completed: false }
+]
+
+const indianStates = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana',
+  'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Jammu and Kashmir',
+  'Ladakh', 'Puducherry', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Lakshadweep'
+]
 
 export default function CheckoutPageClient() {
-  const { user } = useAuth()
-  const [cart, setCart] = useState<Cart>({ items: [], subtotal: 0, tax: 0, shipping: 0, total: 0, itemCount: 0 })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [orderComplete, setOrderComplete] = useState(false)
-  const [orderId, setOrderId] = useState("")
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [cart, setCart] = useState<Cart | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [couponCode, setCouponCode] = useState("")
+  const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discount: number} | null>(null)
 
-  const [formData, setFormData] = useState<CheckoutForm>({
-    email: user?.email || "",
-    shippingAddress: {
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      company: "",
-      address1: "",
-      address2: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: "US",
-    },
-    billingAddress: {
-      firstName: "",
-      lastName: "",
-      company: "",
-      address1: "",
-      address2: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: "US",
-    },
-    sameAsShipping: true,
-    paymentMethod: {
-      type: "card",
-      last4: "",
-      brand: "",
-    },
+  // Form state
+  const [formData, setFormData] = useState({
+    email: "",
+    pin: "",
+    fullName: "",
+    whatsappOptIn: false,
+    address1: "",
+    address2: "",
+    landmark: "",
+    city: "",
+    state: "",
+    billingAddressSame: true,
+    deliveryMethod: "standard",
+    paymentMethod: "card"
   })
 
   useEffect(() => {
-    loadCart()
-  }, [])
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent('/checkout'))
+      return
+    }
 
-  const loadCart = () => {
-    const currentCart = cartApi.getCart()
-    setCart(currentCart)
+    // Pre-fill user data if available
+    setFormData(prev => ({
+      ...prev,
+      email: session.user?.email || "",
+      fullName: session.user?.name || ""
+    }))
+
+    loadCart()
+  }, [session, status, router])
+
+  const loadCart = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch('/api/cart')
+      if (!response.ok) {
+        throw new Error('Failed to load cart')
+      }
+      
+      const cartData = await response.json()
+      setCart(cartData)
+    } catch (error) {
+      console.error('Error loading cart:', error)
+      setError('Failed to load cart')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleInputChange = (section: "shippingAddress" | "billingAddress", field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }))
+  const updateQuantity = async (cartItemId: string, quantity: number) => {
+    if (!cart) return
+
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cartItemId,
+          quantity
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update quantity')
+      }
+
+      await loadCart()
+    } catch (error) {
+      console.error('Error updating quantity:', error)
+      alert('Failed to update quantity')
+    }
+  }
+
+  const removeItem = async (cartItemId: string) => {
+    try {
+      const response = await fetch(`/api/cart?itemId=${cartItemId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove item')
+      }
+
+      await loadCart()
+    } catch (error) {
+      console.error('Error removing item:', error)
+      alert('Failed to remove item')
+    }
+  }
+
+  const applyCoupon = () => {
+    // Mock coupon logic
+    const validCoupons = {
+      'SAVE10': 10,
+      'FIRST20': 20,
+      'WELCOME15': 15
+    }
+
+    if (validCoupons[couponCode.toUpperCase()]) {
+      setAppliedCoupon({
+        code: couponCode.toUpperCase(),
+        discount: validCoupons[couponCode.toUpperCase()]
+      })
+      setCouponCode("")
+    } else {
+      alert("Invalid coupon code")
+    }
+  }
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const response = await orderApi.createOrder(formData)
-
-      if (response.success && response.data) {
-        setOrderId(response.data.id)
-        setOrderComplete(true)
-      } else {
-        setError(response.error || "Failed to process order")
-      }
-    } catch (err) {
-      setError("An unexpected error occurred")
+    
+    if (!cart || cart.items.length === 0) {
+      alert("Your cart is empty")
+      return
     }
 
-    setIsLoading(false)
+    // Basic validation
+    if (!formData.email || !formData.pin || !formData.fullName || !formData.address1 || !formData.city || !formData.state) {
+      alert("Please fill in all required fields")
+      return
+    }
+
+    setIsProcessing(true)
+
+    try {
+      // Mock order creation
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Clear cart and redirect to success page
+      router.push('/checkout/success?order=' + Math.random().toString(36).substring(2, 15))
+    } catch (error) {
+      console.error('Error processing order:', error)
+      alert('Failed to process order')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  if (cart.items.length === 0 && !orderComplete) {
+  if (status === 'loading' || loading) {
+    return (
+      <main className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-springz-green mx-auto mb-4" />
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (!session) {
+    return null // Will redirect in useEffect
+  }
+
+  if (error) {
+    return (
+      <main className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={loadCart}>Try Again</Button>
+        </div>
+      </main>
+    )
+  }
+
+  if (!cart || cart.items.length === 0) {
     return (
       <main className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-md mx-auto space-y-6">
-            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
               <span className="text-4xl">🛒</span>
             </div>
             <div>
-              <h1 className="font-playfair font-bold text-3xl text-foreground mb-4">Your cart is empty</h1>
-              <p className="text-muted-foreground">Add some products to your cart before checking out.</p>
+              <h1 className="font-bold text-3xl text-gray-900 mb-4">Your cart is empty</h1>
+              <p className="text-gray-600">Add some products to your cart before checking out.</p>
             </div>
             <Link href="/shop">
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Button className="bg-springz-green hover:bg-springz-green/90">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Continue Shopping
               </Button>
@@ -121,420 +284,384 @@ export default function CheckoutPageClient() {
     )
   }
 
-  if (orderComplete) {
-    return (
-      <main className="py-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="h-10 w-10 text-green-600" />
-            </div>
-
-            <div>
-              <h1 className="font-playfair font-bold text-3xl text-foreground mb-4">Order Confirmed!</h1>
-              <p className="text-muted-foreground text-lg">
-                Thank you for your order. We've received your payment and will start processing your order shortly.
-              </p>
-            </div>
-
-            <Card className="max-w-md mx-auto">
-              <CardContent className="p-6 text-center">
-                <p className="text-sm text-muted-foreground mb-2">Order Number</p>
-                <p className="font-mono text-lg font-semibold">{orderId}</p>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              <p className="text-muted-foreground">
-                A confirmation email has been sent to <strong>{formData.email}</strong>
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/shop">
-                  <Button variant="outline">Continue Shopping</Button>
-                </Link>
-                <Link href="/">
-                  <Button className="bg-primary hover:bg-primary/90">Back to Home</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    )
-  }
+  const subtotalWithCoupon = cart.summary.subtotal - (appliedCoupon ? (cart.summary.subtotal * appliedCoupon.discount / 100) : 0)
+  const finalTotal = subtotalWithCoupon + cart.summary.shippingCost + cart.summary.tax - (appliedCoupon ? (cart.summary.subtotal * appliedCoupon.discount / 100) : 0)
 
   return (
-    <main className="py-8">
+    <main className="py-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-playfair font-bold text-3xl text-foreground">Checkout</h1>
-            <p className="text-muted-foreground mt-2">Complete your order</p>
-          </div>
-          <Link href="/cart">
-            <Button variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Cart
-            </Button>
+        {/* Header with Steps */}
+        <div className="mb-8">
+          <Link href="/cart" className="inline-flex items-center text-gray-600 hover:text-springz-green mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Cart
           </Link>
+          
+          {/* Step Indicator */}
+          <div className="flex items-center justify-center space-x-8 mb-8">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div className={`flex items-center space-x-2 ${index < steps.length - 1 ? 'pr-8' : ''}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    step.completed ? 'bg-springz-green text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {step.completed ? <Check className="h-4 w-4" /> : index + 1}
+                  </div>
+                  <span className={`text-sm font-medium ${step.completed ? 'text-springz-green' : 'text-gray-600'}`}>
+                    {step.label}
+                  </span>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={`w-16 h-px ${step.completed ? 'bg-springz-green' : 'bg-gray-200'} ml-8`} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Checkout Form */}
+            {/* Left Column - Forms */}
             <div className="lg:col-span-2 space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
               {/* Contact Information */}
-              <Card>
+              <Card className="bg-white">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
-                      1
-                    </span>
-                    Contact Information
-                  </CardTitle>
+                  <CardTitle>Contact</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                      required
-                      disabled={!!user}
-                      placeholder="your@email.com"
-                    />
-                    {!user && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Have an account?{" "}
-                        <Link href="/auth/login" className="text-primary hover:underline">
-                          Sign in
-                        </Link>
-                      </p>
-                    )}
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-green-600 text-white px-2 py-1 text-xs rounded">
+                        PIN
+                      </div>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                        className="pl-16"
+                        required
+                        disabled={!!session?.user?.email}
+                      />
+                    </div>
                   </div>
+
+                  <div>
+                    <Label htmlFor="fullName">Full name</Label>
+                    <div className="flex space-x-2">
+                      <div className="relative flex-shrink-0">
+                        <Input
+                          id="pin"
+                          type="text"
+                          placeholder="+91"
+                          value={formData.pin}
+                          onChange={(e) => setFormData(prev => ({ ...prev, pin: e.target.value }))}
+                          className="w-20"
+                          required
+                        />
+                      </div>
+                      <Input
+                        id="fullName"
+                        type="text"
+                        placeholder="Address line 1, Street"
+                        value={formData.fullName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                        className="flex-1"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="whatsapp"
+                      checked={formData.whatsappOptIn}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, whatsappOptIn: checked as boolean }))}
+                    />
+                    <Label htmlFor="whatsapp" className="text-sm">
+                      Text me with news and offers on WhatsApp
+                    </Label>
+                  </div>
+
+                  {!formData.pin && (
+                    <p className="text-red-500 text-sm">Enter a valid 6-digit PIN</p>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Shipping Address */}
-              <Card>
+              {/* Delivery Address */}
+              <Card className="bg-white">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
-                      2
-                    </span>
-                    Shipping Address
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Deliver to address</CardTitle>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="shippingFirstName">First Name</Label>
-                      <Input
-                        id="shippingFirstName"
-                        value={formData.shippingAddress.firstName}
-                        onChange={(e) => handleInputChange("shippingAddress", "firstName", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="shippingLastName">Last Name</Label>
-                      <Input
-                        id="shippingLastName"
-                        value={formData.shippingAddress.lastName}
-                        onChange={(e) => handleInputChange("shippingAddress", "lastName", e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
                   <div>
-                    <Label htmlFor="shippingCompany">Company (Optional)</Label>
+                    <Label htmlFor="address1">Address line 1, Building, Street</Label>
                     <Input
-                      id="shippingCompany"
-                      value={formData.shippingAddress.company}
-                      onChange={(e) => handleInputChange("shippingAddress", "company", e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="shippingAddress1">Address</Label>
-                    <Input
-                      id="shippingAddress1"
-                      value={formData.shippingAddress.address1}
-                      onChange={(e) => handleInputChange("shippingAddress", "address1", e.target.value)}
+                      id="address1"
+                      type="text"
+                      value={formData.address1}
+                      onChange={(e) => setFormData(prev => ({ ...prev, address1: e.target.value }))}
                       required
-                      placeholder="123 Main Street"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="shippingAddress2">Apartment, suite, etc. (Optional)</Label>
+                    <Label htmlFor="address2">Address line (optional)</Label>
                     <Input
-                      id="shippingAddress2"
-                      value={formData.shippingAddress.address2}
-                      onChange={(e) => handleInputChange("shippingAddress", "address2", e.target.value)}
-                      placeholder="Apt 4B"
+                      id="address2"
+                      type="text"
+                      value={formData.address2}
+                      onChange={(e) => setFormData(prev => ({ ...prev, address2: e.target.value }))}
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="shippingCity">City</Label>
-                      <Input
-                        id="shippingCity"
-                        value={formData.shippingAddress.city}
-                        onChange={(e) => handleInputChange("shippingAddress", "city", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="shippingState">State</Label>
-                      <Input
-                        id="shippingState"
-                        value={formData.shippingAddress.state}
-                        onChange={(e) => handleInputChange("shippingAddress", "state", e.target.value)}
-                        required
-                        placeholder="CA"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="shippingZip">ZIP Code</Label>
-                      <Input
-                        id="shippingZip"
-                        value={formData.shippingAddress.zipCode}
-                        onChange={(e) => handleInputChange("shippingAddress", "zipCode", e.target.value)}
-                        required
-                        placeholder="12345"
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="landmark">Landmark</Label>
+                    <Input
+                      id="landmark"
+                      type="text"
+                      value={formData.landmark}
+                      onChange={(e) => setFormData(prev => ({ ...prev, landmark: e.target.value }))}
+                    />
                   </div>
+
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Select value={formData.state} onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {indianStates.map((state) => (
+                          <SelectItem key={state} value={state}>{state}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="billingAddressSame"
+                      checked={formData.billingAddressSame}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, billingAddressSame: checked as boolean }))}
+                    />
+                    <Label htmlFor="billingAddressSame" className="text-sm">
+                      Billing address same as shipping
+                    </Label>
+                  </div>
+
+                  <Button type="button" className="w-full bg-springz-green hover:bg-springz-green/90">
+                    Deliver to this address
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Delivery Method */}
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle>Delivery Method</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup value={formData.deliveryMethod} onValueChange={(value) => setFormData(prev => ({ ...prev, deliveryMethod: value }))}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="standard" id="standard" />
+                      <Label htmlFor="standard">Standard (3-5 days)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="express" id="express" />
+                      <Label htmlFor="express">Express (1-2 days)</Label>
+                    </div>
+                  </RadioGroup>
                 </CardContent>
               </Card>
 
               {/* Payment Method */}
-              <Card>
+              <Card className="bg-white">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
-                      3
-                    </span>
-                    Payment Method
-                  </CardTitle>
+                  <CardTitle>Payment</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <RadioGroup
-                    value={formData.paymentMethod.type}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        paymentMethod: { ...prev.paymentMethod, type: value as "card" | "paypal" | "apple_pay" },
-                      }))
-                    }
-                  >
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">Choose payment</p>
+                  <RadioGroup value={formData.paymentMethod} onValueChange={(value) => setFormData(prev => ({ ...prev, paymentMethod: value }))}>
+                    <div className="flex items-center space-x-2">
                       <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer">
-                        <CreditCard className="h-4 w-4" />
-                        Credit Card
-                      </Label>
+                      <Label htmlFor="card">Credit/Debit Card</Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg opacity-50">
-                      <RadioGroupItem value="paypal" id="paypal" disabled />
-                      <Label htmlFor="paypal" className="flex items-center gap-2 cursor-not-allowed">
-                        PayPal (Coming Soon)
-                      </Label>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="upi" id="upi" />
+                      <Label htmlFor="upi">UPI</Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg opacity-50">
-                      <RadioGroupItem value="apple_pay" id="apple_pay" disabled />
-                      <Label htmlFor="apple_pay" className="flex items-center gap-2 cursor-not-allowed">
-                        Apple Pay (Coming Soon)
-                      </Label>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="wallet" id="wallet" />
+                      <Label htmlFor="wallet">Wallet</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="cod" id="cod" />
+                      <Label htmlFor="cod">Cash on Delivery</Label>
                     </div>
                   </RadioGroup>
-
-                  {formData.paymentMethod.type === "card" && (
-                    <div className="bg-muted p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Demo Mode:</strong> This is a demonstration checkout. No real payment will be processed.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Billing Address */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
-                      4
-                    </span>
-                    Billing Address
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="sameAsShipping"
-                      checked={formData.sameAsShipping}
-                      onCheckedChange={(checked) =>
-                        setFormData((prev) => ({ ...prev, sameAsShipping: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="sameAsShipping">Same as shipping address</Label>
-                  </div>
-
-                  {!formData.sameAsShipping && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="billingFirstName">First Name</Label>
-                          <Input
-                            id="billingFirstName"
-                            value={formData.billingAddress.firstName}
-                            onChange={(e) => handleInputChange("billingAddress", "firstName", e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="billingLastName">Last Name</Label>
-                          <Input
-                            id="billingLastName"
-                            value={formData.billingAddress.lastName}
-                            onChange={(e) => handleInputChange("billingAddress", "lastName", e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="billingAddress1">Address</Label>
-                        <Input
-                          id="billingAddress1"
-                          value={formData.billingAddress.address1}
-                          onChange={(e) => handleInputChange("billingAddress", "address1", e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="billingCity">City</Label>
-                          <Input
-                            id="billingCity"
-                            value={formData.billingAddress.city}
-                            onChange={(e) => handleInputChange("billingAddress", "city", e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="billingState">State</Label>
-                          <Input
-                            id="billingState"
-                            value={formData.billingAddress.state}
-                            onChange={(e) => handleInputChange("billingAddress", "state", e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="billingZip">ZIP Code</Label>
-                          <Input
-                            id="billingZip"
-                            value={formData.billingAddress.zipCode}
-                            onChange={(e) => handleInputChange("billingAddress", "zipCode", e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Order Summary */}
+            {/* Right Column - Order Summary */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-8">
+              <Card className="bg-white sticky top-8">
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Order Items */}
-                  <div className="space-y-3">
+                  {/* Cart Items */}
+                  <div className="space-y-4">
                     {cart.items.map((item) => (
-                      <div key={item.id} className="flex gap-3">
-                        <img
-                          src={item.product.images[0] || "/placeholder.svg"}
-                          alt={item.product.name}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{item.product.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {item.selectedFlavor.name} • {item.selectedSize.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                      <div key={item.id} className="flex items-center space-x-3">
+                        <div className="relative">
+                          <img
+                            src={item.product.images[0] || "/placeholder-wsy0q.png"}
+                            alt={item.product.name}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                          <div className="absolute -top-2 -right-2 bg-gray-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {item.quantity}
+                          </div>
                         </div>
-                        <p className="text-sm font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm text-gray-900 truncate">{item.product.name}</h4>
+                          <p className="text-xs text-gray-500">{item.size && `${item.size} • `}2 glis</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="w-6 h-6 rounded-full border border-red-300 flex items-center justify-center hover:bg-red-50 text-red-500"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium text-sm">{formatINR(item.subtotal)}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
 
                   <Separator />
 
-                  {/* Totals */}
+                  {/* Coupon Section */}
+                  <div className="space-y-3">
+                    {appliedCoupon ? (
+                      <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Check className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-700">{appliedCoupon.code}</span>
+                          <span className="text-sm text-green-600">(-{appliedCoupon.discount}%)</span>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" onClick={removeCoupon}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex space-x-2">
+                        <Input
+                          placeholder="Coupon"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button type="button" variant="outline" onClick={applyCoupon}>
+                          Apply
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Price Breakdown */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Subtotal ({cart.itemCount} items)</span>
-                      <span>${cart.subtotal.toFixed(2)}</span>
+                      <span>Subtotal</span>
+                      <span>{formatINR(cart.summary.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
-                      <span>{cart.shipping === 0 ? "FREE" : `$${cart.shipping.toFixed(2)}`}</span>
+                      <span>{cart.summary.shippingCost === 0 ? 'FREE' : formatINR(cart.summary.shippingCost)}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Tax</span>
-                      <span>${cart.tax.toFixed(2)}</span>
-                    </div>
+                    {appliedCoupon && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Discount ({appliedCoupon.code})</span>
+                        <span>-{formatINR(cart.summary.subtotal * appliedCoupon.discount / 100)}</span>
+                      </div>
+                    )}
                     <Separator />
                     <div className="flex justify-between font-semibold text-lg">
                       <span>Total</span>
-                      <span>${cart.total.toFixed(2)}</span>
+                      <span>{formatINR(finalTotal)}</span>
                     </div>
                   </div>
 
-                  {/* Trust Indicators */}
-                  <div className="space-y-2 pt-4 border-t">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Truck className="h-4 w-4" />
-                      <span>Free shipping over $75</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Shield className="h-4 w-4" />
-                      <span>30-day money-back guarantee</span>
-                    </div>
-                  </div>
-
-                  {/* Place Order Button */}
-                  <Button
-                    type="submit"
-                    className="w-full bg-primary hover:bg-primary/90"
-                    size="lg"
-                    disabled={isLoading}
+                  {/* Choose Payment Button */}
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-springz-green hover:bg-springz-green/90 py-3 text-lg font-medium"
+                    disabled={isProcessing}
                   >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isLoading ? "Processing..." : `Complete Order - $${cart.total.toFixed(2)}`}
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Choose payment"
+                    )}
                   </Button>
+
+                  {/* Trust Badges */}
+                  <div className="flex items-center justify-around pt-4 border-t border-gray-100">
+                    <div className="text-center">
+                      <Shield className="h-6 w-6 mx-auto mb-1 text-gray-600" />
+                      <span className="text-xs text-gray-600">Secure<br />checkout</span>
+                    </div>
+                    <div className="text-center">
+                      <RotateCcw className="h-6 w-6 mx-auto mb-1 text-gray-600" />
+                      <span className="text-xs text-gray-600">30-day<br />returns</span>
+                    </div>
+                    <div className="text-center">
+                      <Award className="h-6 w-6 mx-auto mb-1 text-gray-600" />
+                      <span className="text-xs text-gray-600">FSSAI/GMP</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

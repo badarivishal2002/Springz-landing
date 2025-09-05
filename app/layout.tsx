@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Baloo_2, Nunito } from "next/font/google"
 import { AuthProvider } from "@/hooks/useAuth"
 import { SessionProvider } from "@/components/SessionProvider"
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 const baloo = Baloo_2({
@@ -114,7 +115,10 @@ export default function RootLayout({
       </head>
       <body className="font-sans bg-background text-foreground">
         <SessionProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </SessionProvider>
       </body>
     </html>

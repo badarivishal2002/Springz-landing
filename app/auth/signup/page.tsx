@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { signIn, getSession } from "next-auth/react"
+import { useState } from "react"
+import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -31,15 +31,6 @@ export default function SignUpPage() {
   const [error, setError] = useState("")
   
   const callbackUrl = searchParams.get("callbackUrl") || "/"
-  
-  useEffect(() => {
-    // Check if user is already signed in
-    getSession().then((session) => {
-      if (session) {
-        router.push(callbackUrl)
-      }
-    })
-  }, [router, callbackUrl])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -155,12 +146,12 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-springz-cream flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <h1 className="text-3xl font-bold text-springz-green">Springz Nutrition</h1>
+            <h1 className="text-3xl font-bold text-green-600">Springz Nutrition</h1>
             <p className="text-gray-600 mt-2">Create your account</p>
           </Link>
         </div>
@@ -289,7 +280,7 @@ export default function SignUpPage() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-springz-green hover:bg-springz-green/90" 
+                className="w-full bg-green-600 hover:bg-green-700" 
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -338,17 +329,17 @@ export default function SignUpPage() {
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-center text-xs text-gray-600">
               By creating an account, you agree to our{" "}
-              <Link href="/terms" className="text-springz-green hover:underline">
+              <Link href="/terms" className="text-green-600 hover:underline">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-springz-green hover:underline">
+              <Link href="/privacy" className="text-green-600 hover:underline">
                 Privacy Policy
               </Link>
             </div>
             <div className="text-center text-sm">
               <span className="text-gray-600">Already have an account? </span>
-              <Link href="/auth/signin" className="text-springz-green hover:underline font-medium">
+              <Link href="/auth/signin" className="text-green-600 hover:underline font-medium">
                 Sign in here
               </Link>
             </div>

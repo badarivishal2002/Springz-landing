@@ -55,25 +55,25 @@ async function main() {
     })
     console.log(`✅ Created demo customer: ${demoEmail}`)
     
-    // Create your specific categories
+    // Create real categories
     const categories = [
       {
         name: 'Premium Plant Proteins',
         slug: 'premium-plant-proteins',
         description: 'High-quality plant-based protein powders for optimal nutrition and muscle building',
-        image: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop'
+        image: '/athletic-person-protein-shake.png'
       },
       {
         name: 'Functional Foods',
         slug: 'functional-foods',
         description: 'Nutritionally enhanced foods that provide health benefits beyond basic nutrition',
-        image: 'https://images.unsplash.com/photo-1505935428862-770b6f24f629?w=400&h=300&fit=crop'
+        image: '/recovery-blend-ingredients.png'
       },
       {
         name: 'Guilt-Free Snacks',
         slug: 'guilt-free-snacks',
         description: 'Healthy, delicious snacks that satisfy your cravings without compromise',
-        image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop'
+        image: '/placeholder-wsy0q.png'
       }
     ]
     
@@ -86,7 +86,7 @@ async function main() {
       console.log(`✅ Created category: ${categoryData.name}`)
     }
     
-    // Create your specific products
+    // Create real products
     const products = [
       // Premium Plant Proteins
       {
@@ -98,9 +98,9 @@ async function main() {
         originalPrice: 2999,
         categoryId: createdCategories['premium-plant-proteins'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=800&h=800&fit=crop'
+          '/athletic-person-protein-shake.png',
+          '/native-protein-powder.png',
+          '/placeholder-wsy0q.png'
         ]),
         servingSize: '30g',
         protein: '25g',
@@ -145,9 +145,10 @@ async function main() {
         },
         nutritionFacts: {
           create: [
+            { label: 'Serving Size', value: '30g' },
+            { label: 'Calories', value: '110' },
             { label: 'Leucine', value: '2.8g' },
             { label: 'Lysine', value: '2.1g' },
-            { label: 'Methionine', value: '0.9g' },
             { label: 'Fiber', value: '2g' },
             { label: 'Iron', value: '4.5mg' },
             { label: 'Calcium', value: '120mg' }
@@ -199,8 +200,8 @@ async function main() {
         originalPrice: 2399,
         categoryId: createdCategories['premium-plant-proteins'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=800&h=800&fit=crop'
+          '/native-protein-powder.png',
+          '/placeholder-wsy0q.png'
         ]),
         servingSize: '32g',
         protein: '22g',
@@ -239,6 +240,8 @@ async function main() {
         },
         nutritionFacts: {
           create: [
+            { label: 'Serving Size', value: '32g' },
+            { label: 'Calories', value: '120' },
             { label: 'Leucine', value: '2.2g' },
             { label: 'Lysine', value: '1.8g' },
             { label: 'Fiber', value: '1.5g' },
@@ -258,6 +261,18 @@ async function main() {
             { point: 'Easily digestible plant-based protein sources' },
             { point: 'No artificial colors or preservatives' }
           ]
+        },
+        faqs: {
+          create: [
+            {
+              question: 'What makes this different from Elite Protein?',
+              answer: 'Native Protein Classic is our foundational formula with excellent value, while Elite Protein has enhanced features like digestive enzymes and premium sourcing.'
+            },
+            {
+              question: 'Is it suitable for weight loss?',
+              answer: 'Yes, the high protein content helps maintain muscle mass during weight loss and increases satiety.'
+            }
+          ]
         }
       },
       {
@@ -269,8 +284,8 @@ async function main() {
         originalPrice: 2599,
         categoryId: createdCategories['premium-plant-proteins'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=800&h=800&fit=crop'
+          '/native-protein-powder.png',
+          '/placeholder-wsy0q.png'
         ]),
         servingSize: '33g',
         protein: '23g',
@@ -306,6 +321,42 @@ async function main() {
               description: 'Cocoa provides gentle natural energy boost' 
             }
           ]
+        },
+        nutritionFacts: {
+          create: [
+            { label: 'Serving Size', value: '33g' },
+            { label: 'Calories', value: '125' },
+            { label: 'Protein', value: '23g' },
+            { label: 'Fats', value: '3.5g' },
+            { label: 'Carbs', value: '5g' },
+            { label: 'Sugar', value: '2g' }
+          ]
+        },
+        howToUse: {
+          create: [
+            { step: 1, instruction: 'Mix 1 scoop (33g) with 250-300ml of water or plant milk' },
+            { step: 2, instruction: 'Perfect for post-workout recovery or as a healthy dessert alternative' },
+            { step: 3, instruction: 'Can be blended with banana and ice for a delicious chocolate smoothie' }
+          ]
+        },
+        sciencePoints: {
+          create: [
+            { point: 'Natural cocoa provides antioxidants and flavonoids' },
+            { point: 'Premium plant protein blend for muscle recovery' },
+            { point: 'Low sugar content with natural sweeteners' }
+          ]
+        },
+        faqs: {
+          create: [
+            {
+              question: 'Does it taste like real chocolate?',
+              answer: 'Yes! We use natural cocoa powder to give it an authentic, rich chocolate flavor without artificial additives.'
+            },
+            {
+              question: 'Can I use this for baking?',
+              answer: 'Absolutely! It\'s perfect for protein pancakes, muffins, and chocolate protein brownies.'
+            }
+          ]
         }
       },
 
@@ -319,8 +370,8 @@ async function main() {
         originalPrice: 1099,
         categoryId: createdCategories['functional-foods'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1505935428862-770b6f24f629?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1551326844-4df8b080d98d?w=800&h=800&fit=crop'
+          '/recovery-blend-ingredients.png',
+          '/placeholder-wsy0q.png'
         ]),
         servingSize: '25g',
         protein: '8g',
@@ -359,6 +410,8 @@ async function main() {
         },
         nutritionFacts: {
           create: [
+            { label: 'Serving Size', value: '25g' },
+            { label: 'Calories', value: '95' },
             { label: 'Dietary Fiber', value: '4g' },
             { label: 'Iron', value: '3.2mg' },
             { label: 'Calcium', value: '85mg' },
@@ -380,6 +433,18 @@ async function main() {
             { point: 'High in soluble fiber for cholesterol management' },
             { point: 'Ancient grains provide sustained release of energy' }
           ]
+        },
+        faqs: {
+          create: [
+            {
+              question: 'What is Nuchhi-Nunde?',
+              answer: 'Nuchhi-Nunde is a traditional South Indian health food made from roasted grains, lentils, and spices. It\'s been used for generations for its nutritional and digestive benefits.'
+            },
+            {
+              question: 'How does it help with digestion?',
+              answer: 'The combination of spices like fenugreek and asafoetida, along with fiber-rich grains, naturally supports healthy digestion and gut health.'
+            }
+          ]
         }
       },
       {
@@ -391,8 +456,8 @@ async function main() {
         originalPrice: 999,
         categoryId: createdCategories['functional-foods'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'
+          '/placeholder-wsy0q.png',
+          '/recovery-blend-ingredients.png'
         ]),
         servingSize: '20g',
         protein: '12g',
@@ -428,6 +493,44 @@ async function main() {
               description: 'Perfect for baking, smoothies, and more' 
             }
           ]
+        },
+        nutritionFacts: {
+          create: [
+            { label: 'Serving Size', value: '20g' },
+            { label: 'Calories', value: '85' },
+            { label: 'Protein', value: '12g' },
+            { label: 'Fats', value: '3g' },
+            { label: 'Carbs', value: '6g' },
+            { label: 'Sodium', value: '150mg' }
+          ]
+        },
+        howToUse: {
+          create: [
+            { step: 1, instruction: 'Mix 2 tablespoons powder with 1 tablespoon water to make peanut butter spread' },
+            { step: 2, instruction: 'Add to smoothies, oatmeal, or yogurt for extra protein and flavor' },
+            { step: 3, instruction: 'Use in baking recipes as a healthy ingredient replacement' },
+            { step: 4, instruction: 'Perfect for protein pancakes and energy balls' }
+          ]
+        },
+        sciencePoints: {
+          create: [
+            { point: 'Defatted through natural pressing process to reduce calories' },
+            { point: 'Enhanced with plant protein for better nutritional profile' },
+            { point: 'Contains healthy peanut nutrients including vitamin E and niacin' },
+            { point: 'Natural stevia sweetening without added sugars' }
+          ]
+        },
+        faqs: {
+          create: [
+            {
+              question: 'How do I make peanut butter from this powder?',
+              answer: 'Simply mix 2 parts powder with 1 part water and stir until you get your desired consistency. You can add more water for a thinner consistency.'
+            },
+            {
+              question: 'Is this healthier than regular peanut butter?',
+              answer: 'Yes, it has 75% less fat and significantly more protein per serving compared to regular peanut butter, making it a healthier choice.'
+            }
+          ]
         }
       },
       {
@@ -439,8 +542,8 @@ async function main() {
         originalPrice: 1049,
         categoryId: createdCategories['functional-foods'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1574653853027-5d5e67d3b73c?w=800&h=800&fit=crop'
+          '/placeholder-wsy0q.png',
+          '/recovery-blend-ingredients.png'
         ]),
         servingSize: '20g',
         protein: '12g',
@@ -475,6 +578,44 @@ async function main() {
               description: 'One-of-a-kind taste experience' 
             }
           ]
+        },
+        nutritionFacts: {
+          create: [
+            { label: 'Serving Size', value: '20g' },
+            { label: 'Calories', value: '88' },
+            { label: 'Protein', value: '12g' },
+            { label: 'Fats', value: '3.5g' },
+            { label: 'Carbs', value: '5g' },
+            { label: 'Capsaicin', value: '2mg' }
+          ]
+        },
+        howToUse: {
+          create: [
+            { step: 1, instruction: 'Mix with water to create a spicy peanut butter spread' },
+            { step: 2, instruction: 'Add to savory smoothies for a protein and spice boost' },
+            { step: 3, instruction: 'Use as a seasoning powder for roasted vegetables or snacks' },
+            { step: 4, instruction: 'Perfect for making spicy protein energy balls' }
+          ]
+        },
+        sciencePoints: {
+          create: [
+            { point: 'Capsaicin from chili may boost metabolism and fat burning' },
+            { point: 'Spices provide anti-inflammatory compounds' },
+            { point: 'High protein content supports muscle maintenance' },
+            { point: 'Unique flavor profile encourages varied nutrition' }
+          ]
+        },
+        faqs: {
+          create: [
+            {
+              question: 'How spicy is this product?',
+              answer: 'It has a moderate spice level - flavorful with a gentle heat that most people can enjoy. It\'s not overwhelmingly hot.'
+            },
+            {
+              question: 'Can I use this in sweet recipes?',
+              answer: 'While it\'s designed for savory applications, some customers enjoy the unique flavor in spicy-sweet combinations like chocolate chili energy balls.'
+            }
+          ]
         }
       },
 
@@ -488,8 +629,8 @@ async function main() {
         originalPrice: 399,
         categoryId: createdCategories['guilt-free-snacks'].id,
         images: JSON.stringify([
-          'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1582022006788-46e71e8bf292?w=800&h=800&fit=crop'
+          '/placeholder-wsy0q.png',
+          '/placeholder-te1mw.png'
         ]),
         servingSize: '30g',
         protein: '6g',
@@ -528,6 +669,8 @@ async function main() {
         },
         nutritionFacts: {
           create: [
+            { label: 'Serving Size', value: '30g' },
+            { label: 'Calories', value: '135' },
             { label: 'Dietary Fiber', value: '3g' },
             { label: 'Iron', value: '2.1mg' },
             { label: 'Folate', value: '45mcg' },
@@ -549,6 +692,22 @@ async function main() {
             { point: 'Contains beneficial spices with anti-inflammatory properties' },
             { point: 'Baked processing retains more nutrients than frying' }
           ]
+        },
+        faqs: {
+          create: [
+            {
+              question: 'What makes these different from regular kodubale?',
+              answer: 'Our kodubale are baked instead of fried, making them lower in unhealthy fats while retaining the authentic taste and adding nutritional benefits.'
+            },
+            {
+              question: 'Are these suitable for kids?',
+              answer: 'Yes! They\'re a healthy snack option for children, providing protein and essential nutrients without excessive oil or artificial additives.'
+            },
+            {
+              question: 'How long do they stay fresh?',
+              answer: 'When stored in an airtight container, they maintain their crispiness and flavor for up to 3 months.'
+            }
+          ]
         }
       }
     ]
@@ -561,12 +720,12 @@ async function main() {
       console.log(`✅ Created product: ${productData.name}`)
     }
 
-    // Create some sample reviews
+    // Create sample reviews for real products
     const allProducts = await prisma.product.findMany()
     
     const sampleReviews = [
       {
-        productId: allProducts[0].id, // Elite Protein
+        productId: allProducts.find(p => p.slug === 'elite-protein')?.id,
         userId: demoUser.id,
         rating: 5,
         title: 'Excellent quality protein!',
@@ -574,7 +733,7 @@ async function main() {
         verified: true
       },
       {
-        productId: allProducts[0].id, // Elite Protein
+        productId: allProducts.find(p => p.slug === 'elite-protein')?.id,
         userId: adminUser.id,
         rating: 5,
         title: 'Perfect for post-workout',
@@ -582,29 +741,47 @@ async function main() {
         verified: true
       },
       {
-        productId: allProducts[3].id, // Nuchhi-Nunde
+        productId: allProducts.find(p => p.slug === 'nuchhi-nunde')?.id,
         userId: demoUser.id,
         rating: 4,
         title: 'Authentic taste',
         comment: 'Reminds me of my grandmother\'s recipe. Very nutritious and keeps me full for hours.',
         verified: true
+      },
+      {
+        productId: allProducts.find(p => p.slug === 'kodubale')?.id,
+        userId: adminUser.id,
+        rating: 5,
+        title: 'Healthy and delicious!',
+        comment: 'Finally, a healthy snack that actually tastes good. My kids love these too!',
+        verified: true
+      },
+      {
+        productId: allProducts.find(p => p.slug === 'native-protein-chocolate')?.id,
+        userId: demoUser.id,
+        rating: 5,
+        title: 'Rich chocolate flavor',
+        comment: 'Tastes like a real chocolate milkshake. Hard to believe it\'s plant-based!',
+        verified: true
       }
     ]
 
     for (const reviewData of sampleReviews) {
-      await prisma.review.create({
-        data: reviewData
-      })
+      if (reviewData.productId) {
+        await prisma.review.create({
+          data: reviewData
+        })
+      }
     }
-    console.log(`✅ Created ${sampleReviews.length} sample reviews`)
+    console.log(`✅ Created ${sampleReviews.filter(r => r.productId).length} sample reviews`)
     
-    console.log('🎉 Database seeded successfully!')
+    console.log('🎉 Database seeded successfully with real Springz products!')
     console.log('\n📋 Login credentials:')
     console.log(`Admin: ${adminEmail} / ${adminPassword}`)
     console.log(`Demo Customer: ${demoEmail} / demo123`)
     console.log('\n🛍️ Created Categories:')
     categories.forEach(cat => console.log(`- ${cat.name}`))
-    console.log('\n📦 Created Products:')
+    console.log('\n📦 Created Real Products:')
     products.forEach(prod => console.log(`- ${prod.name} (₹${prod.price})`))
     
   } catch (error) {

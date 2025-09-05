@@ -127,7 +127,7 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <div className="flex items-center space-x-3">
-                  <Link href="/auth/login">
+                  <Link href="/auth/signin">
                     <Button 
                       variant="ghost" 
                       size="lg"
@@ -216,7 +216,7 @@ export default function Header() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <Link href="/auth/login" className="block">
+                      <Link href="/auth/signin" className="block">
                         <Button 
                           variant="ghost" 
                           size="lg" 

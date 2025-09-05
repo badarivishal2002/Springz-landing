@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
@@ -15,7 +17,8 @@ import {
   Award,
   Leaf,
   Shield,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from "lucide-react"
 import { 
   Collapsible,
@@ -79,11 +82,16 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {
+  const { data: session } = useSession()
+  const router = useRouter()
   const [selectedSize, setSelectedSize] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [selectedImage, setSelectedImage] = useState(0)
   const [openFaqs, setOpenFaqs] = useState<number[]>([])
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isBuyingNow, setIsBuyingNow] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
   const currentPrice = product.sizes[selectedSize]?.price || product.price
   const originalPrice = product.sizes[selectedSize]?.originalPrice || product.originalPrice
@@ -96,6 +104,83 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         ? prev.filter(i => i !== index)
         : [...prev, index]
     )
+  }
+
+  const handleAddToCart = async () => {
+    if (!product.inStock) return
+
+    setIsAddingToCart(true)
+
+    try {
+      if (!session) {
+        router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.href))
+        return
+      }
+
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: quantity,
+          size: product.sizes[selectedSize]?.name || null
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add to cart')
+      }
+
+      setJustAdded(true)
+      setTimeout(() => setJustAdded(false), 3000)
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      alert('Failed to add product to cart: ' + error.message)
+    } finally {
+      setIsAddingToCart(false)
+    }
+  }
+
+  const handleBuyNow = async () => {
+    if (!product.inStock) return
+
+    setIsBuyingNow(true)
+
+    try {
+      if (!session) {
+        router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/product/${product.slug}`))
+        return
+      }
+
+      // Add to cart first
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: quantity,
+          size: product.sizes[selectedSize]?.name || null
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add to cart')
+      }
+
+      // Redirect to checkout
+      router.push('/checkout')
+    } catch (error) {
+      console.error('Error with buy now:', error)
+      alert('Failed to process buy now: ' + error.message)
+    } finally {
+      setIsBuyingNow(false)
+    }
   }
 
   const getFeatureIcon = (feature: { icon: string; label: string; description: string }) => {
@@ -262,6 +347,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="p-2 hover:bg-gray-100"
+                    disabled={isAddingToCart || isBuyingNow}
                   >
                     <Minus className="h-4 w-4" />
                   </button>
@@ -269,6 +355,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="p-2 hover:bg-gray-100"
+                    disabled={isAddingToCart || isBuyingNow}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -280,16 +367,46 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <Button 
                 size="lg" 
                 className="flex-1 bg-springz-orange hover:bg-springz-orange/90 text-white py-4 text-lg font-medium rounded-lg"
+                onClick={handleBuyNow}
+                disabled={!product.inStock || isBuyingNow || isAddingToCart}
               >
-                Buy Now
+                {isBuyingNow ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Buy Now"
+                )}
               </Button>
+              
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="flex-1 border-2 border-gray-400 text-gray-700 hover:bg-gray-50 py-4 text-lg font-medium rounded-lg"
+                className={`flex-1 border-2 py-4 text-lg font-medium rounded-lg transition-all ${
+                  justAdded 
+                    ? "bg-green-50 border-green-200 text-green-700" 
+                    : "border-gray-400 text-gray-700 hover:bg-gray-50"
+                }`}
+                onClick={handleAddToCart}
+                disabled={!product.inStock || isAddingToCart || isBuyingNow}
               >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
+                {isAddingToCart ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Adding...
+                  </>
+                ) : justAdded ? (
+                  <>
+                    <CheckCircle className="mr-2 h-5 w-5" />
+                    Added to Cart!
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Add to Cart
+                  </>
+                )}
               </Button>
             </div>
 

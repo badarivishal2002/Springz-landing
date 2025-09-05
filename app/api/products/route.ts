@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -109,23 +108,23 @@ export async function GET(request: NextRequest) {
       skip: offset
     })
 
-      // Parse JSON fields for SQLite
-      const productsWithParsed = products.map(product => {
-        const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0)
-        const averageRating = product.reviews.length > 0 ? totalRating / product.reviews.length : 0
-        
-        return {
-          ...product,
-          images: product.images ? JSON.parse(product.images) : [],
-          tags: product.tags ? JSON.parse(product.tags) : [],
-          rating: Math.round(averageRating * 10) / 10,
-          reviewCount: product._count.reviews,
-          reviews: undefined, // Remove reviews data from response
-          _count: undefined
-        }
-      })
+    // Parse JSON fields for SQLite
+    const productsWithParsed = products.map(product => {
+      const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0)
+      const averageRating = product.reviews.length > 0 ? totalRating / product.reviews.length : 0
+      
+      return {
+        ...product,
+        images: product.images ? JSON.parse(product.images) : [],
+        tags: product.tags ? JSON.parse(product.tags) : [],
+        rating: Math.round(averageRating * 10) / 10,
+        reviewCount: product._count.reviews,
+        reviews: undefined, // Remove reviews data from response
+        _count: undefined
+      }
+    })
 
-      return NextResponse.json(productsWithParsed)
+    return NextResponse.json(productsWithParsed)
   } catch (error) {
     console.error('Error fetching products:', error)
     return NextResponse.json(
@@ -138,14 +137,7 @@ export async function GET(request: NextRequest) {
 // POST /api/products - Create new product (Admin only)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requireAdmin()
 
     const body = await request.json()
     const validatedData = productSchema.parse(body)
@@ -227,6 +219,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
+    if (error instanceof Error && (error.message.includes('Authentication') || error.message.includes('Admin'))) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message.includes('Admin') ? 403 : 401 }
+      )
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },

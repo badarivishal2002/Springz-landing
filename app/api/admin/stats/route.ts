@@ -1,28 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication and admin role
     const session = await getServerSession(authOptions)
-    
     if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get current date for period calculations
+    // Get current date for monthly calculations
     const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
-    const startOfYear = new Date(now.getFullYear(), 0, 1)
-    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-    // Basic counts and aggregations
+    // Execute all queries concurrently for better performance
     const [
       totalProducts,
       totalCategories,
@@ -30,21 +25,20 @@ export async function GET(request: NextRequest) {
       totalCustomers,
       totalOrders,
       totalRevenue,
-      revenueThisMonth,
-      revenueLastMonth,
-      ordersThisMonth,
-      ordersLastMonth,
-      newCustomersThisMonth,
-      newCustomersLastMonth,
-      averageOrderValue,
-      topProducts,
-      recentOrders,
-      monthlyRevenue,
+      thisMonthRevenue,
+      lastMonthRevenue,
+      thisMonthOrders,
+      lastMonthOrders,
+      thisMonthCustomers,
+      lastMonthCustomers,
       productsByCategory,
-      reviewStats
+      topSellingProducts,
+      reviewStats,
+      recentOrders,
+      averageOrderValue
     ] = await Promise.all([
       // Basic counts
-      prisma.product.count(),
+      prisma.product.count({ where: { inStock: true } }),
       prisma.category.count(),
       prisma.user.count(),
       prisma.user.count({ where: { role: 'CUSTOMER' } }),
@@ -58,97 +52,40 @@ export async function GET(request: NextRequest) {
       prisma.order.aggregate({
         where: { 
           paymentStatus: 'PAID',
-          createdAt: { gte: startOfMonth }
+          createdAt: { gte: startOfThisMonth }
         },
         _sum: { total: true }
       }),
       prisma.order.aggregate({
         where: { 
           paymentStatus: 'PAID',
-          createdAt: { 
-            gte: startOfLastMonth,
-            lte: endOfLastMonth
-          }
+          createdAt: { gte: startOfLastMonth, lte: endOfLastMonth }
         },
         _sum: { total: true }
       }),
-      
-      // Order counts by period
+
+      // Order counts by month
       prisma.order.count({
-        where: { createdAt: { gte: startOfMonth } }
+        where: { createdAt: { gte: startOfThisMonth } }
       }),
       prisma.order.count({
-        where: { 
-          createdAt: { 
-            gte: startOfLastMonth,
-            lte: endOfLastMonth
-          }
-        }
+        where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
       }),
-      
-      // Customer counts by period
+
+      // Customer counts by month
       prisma.user.count({
         where: { 
           role: 'CUSTOMER',
-          createdAt: { gte: startOfMonth }
+          createdAt: { gte: startOfThisMonth }
         }
       }),
       prisma.user.count({
         where: { 
           role: 'CUSTOMER',
-          createdAt: { 
-            gte: startOfLastMonth,
-            lte: endOfLastMonth
-          }
+          createdAt: { gte: startOfLastMonth, lte: endOfLastMonth }
         }
       }),
-      
-      // Average order value
-      prisma.order.aggregate({
-        where: { paymentStatus: 'PAID' },
-        _avg: { total: true }
-      }),
-      
-      // Top selling products
-      prisma.orderItem.groupBy({
-        by: ['productId'],
-        _sum: { quantity: true },
-        _count: { productId: true },
-        orderBy: { _sum: { quantity: 'desc' } },
-        take: 5
-      }),
-      
-      // Recent orders
-      prisma.order.findMany({
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: {
-            select: { name: true, email: true }
-          },
-          items: {
-            include: {
-              product: {
-                select: { name: true }
-              }
-            }
-          }
-        }
-      }),
-      
-      // Monthly revenue for the year
-      prisma.$queryRaw`
-        SELECT 
-          strftime('%Y-%m', createdAt) as month,
-          SUM(total) as revenue,
-          COUNT(*) as orders
-        FROM "Order" 
-        WHERE paymentStatus = 'PAID' 
-          AND createdAt >= ${startOfYear.toISOString()}
-        GROUP BY strftime('%Y-%m', createdAt)
-        ORDER BY month
-      `,
-      
+
       // Products by category
       prisma.category.findMany({
         include: {
@@ -157,13 +94,66 @@ export async function GET(request: NextRequest) {
           }
         }
       }),
-      
+
+      // Top selling products (based on order items)
+      prisma.orderItem.groupBy({
+        by: ['productId'],
+        _sum: { quantity: true },
+        _count: { id: true },
+        orderBy: { _sum: { quantity: 'desc' } },
+        take: 5
+      }),
+
       // Review statistics
       prisma.review.aggregate({
         _avg: { rating: true },
-        _count: { rating: true }
+        _count: { id: true }
+      }),
+
+      // Recent orders
+      prisma.order.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: { name: true, email: true }
+          },
+          _count: {
+            select: { items: true }
+          }
+        }
+      }),
+
+      // Average order value
+      prisma.order.aggregate({
+        where: { paymentStatus: 'PAID' },
+        _avg: { total: true }
       })
     ])
+
+    // Get product details for top selling products
+    const topSellingProductDetails = await Promise.all(
+      topSellingProducts.map(async (item) => {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            images: true
+          }
+        })
+        
+        return {
+          productId: item.productId,
+          name: product?.name || 'Unknown Product',
+          price: product?.price || 0,
+          image: product?.images ? JSON.parse(product.images)[0] : null,
+          totalSold: item._sum.quantity || 0,
+          orderCount: item._count.id || 0
+        }
+      })
+    )
 
     // Calculate growth percentages
     const calculateGrowth = (current: number, previous: number) => {
@@ -171,32 +161,14 @@ export async function GET(request: NextRequest) {
       return Math.round(((current - previous) / previous) * 100)
     }
 
-    // Process monthly revenue data
-    const monthlyRevenueData = (monthlyRevenue as any[]).map(item => ({
-      month: item.month,
-      revenue: Number(item.revenue) || 0,
-      orders: Number(item.orders) || 0
-    }))
+    const revenueThisMonth = thisMonthRevenue._sum.total || 0
+    const revenueLastMonth = lastMonthRevenue._sum.total || 0
+    const ordersThisMonth = thisMonthOrders
+    const ordersLastMonth = lastMonthOrders
+    const customersThisMonth = thisMonthCustomers
+    const customersLastMonth = lastMonthCustomers
 
-    // Get product details for top products
-    const topProductsWithDetails = await Promise.all(
-      topProducts.map(async (item) => {
-        const product = await prisma.product.findUnique({
-          where: { id: item.productId },
-          select: { name: true, price: true, images: true }
-        })
-        return {
-          productId: item.productId,
-          name: product?.name || 'Unknown Product',
-          price: product?.price || 0,
-          image: product?.images ? JSON.parse(product.images)[0] : null,
-          totalSold: item._sum.quantity || 0,
-          orderCount: item._count.productId || 0
-        }
-      })
-    )
-
-    // Prepare response data
+    // Format response data
     const stats = {
       overview: {
         totalProducts,
@@ -208,12 +180,9 @@ export async function GET(request: NextRequest) {
       },
       revenue: {
         total: totalRevenue._sum.total || 0,
-        thisMonth: revenueThisMonth._sum.total || 0,
-        lastMonth: revenueLastMonth._sum.total || 0,
-        growth: calculateGrowth(
-          revenueThisMonth._sum.total || 0,
-          revenueLastMonth._sum.total || 0
-        ),
+        thisMonth: revenueThisMonth,
+        lastMonth: revenueLastMonth,
+        growth: calculateGrowth(revenueThisMonth, revenueLastMonth),
         averageOrderValue: averageOrderValue._avg.total || 0
       },
       orders: {
@@ -224,37 +193,34 @@ export async function GET(request: NextRequest) {
       },
       customers: {
         total: totalCustomers,
-        newThisMonth: newCustomersThisMonth,
-        newLastMonth: newCustomersLastMonth,
-        growth: calculateGrowth(newCustomersThisMonth, newCustomersLastMonth)
+        newThisMonth: customersThisMonth,
+        newLastMonth: customersLastMonth,
+        growth: calculateGrowth(customersThisMonth, customersLastMonth)
       },
       products: {
         total: totalProducts,
-        byCategory: productsByCategory.map(cat => ({
-          categoryId: cat.id,
-          categoryName: cat.name,
-          productCount: cat._count.products
+        byCategory: productsByCategory.map(category => ({
+          categoryId: category.id,
+          categoryName: category.name,
+          productCount: category._count.products
         })),
-        topSelling: topProductsWithDetails
+        topSelling: topSellingProductDetails
       },
       reviews: {
         averageRating: Math.round((reviewStats._avg.rating || 0) * 10) / 10,
-        totalReviews: reviewStats._count.rating || 0
-      },
-      charts: {
-        monthlyRevenue: monthlyRevenueData
+        totalReviews: reviewStats._count.id || 0
       },
       recentActivity: {
         recentOrders: recentOrders.map(order => ({
           id: order.id,
           orderNumber: order.orderNumber,
-          customerName: order.user.name,
+          customerName: order.user.name || 'Unknown Customer',
           customerEmail: order.user.email,
           total: order.total,
           status: order.status,
           paymentStatus: order.paymentStatus,
-          itemCount: order.items.length,
-          createdAt: order.createdAt
+          itemCount: order._count.items,
+          createdAt: order.createdAt.toISOString()
         }))
       }
     }

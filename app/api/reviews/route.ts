@@ -1,34 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
 
-const reviewSchema = z.object({
-  productId: z.string().min(1, 'Product ID is required'),
-  rating: z.number().int().min(1).max(5, 'Rating must be between 1 and 5'),
-  title: z.string().optional(),
-  comment: z.string().min(1, 'Comment is required'),
-})
-
-// GET /api/reviews - Get all reviews with filtering
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const productId = searchParams.get('productId')
-    const userId = searchParams.get('userId')
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
+    const productId = searchParams.get('productId')
 
-    const where: any = {}
-
-    if (productId) {
-      where.productId = productId
-    }
-
-    if (userId) {
-      where.userId = userId
-    }
+    const where = productId ? { productId } : {}
 
     const reviews = await prisma.review.findMany({
       where,
@@ -49,12 +31,23 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: {
+        createdAt: 'desc'
+      },
       take: limit,
       skip: offset
     })
 
-    return NextResponse.json(reviews)
+    // Process reviews to include parsed images
+    const processedReviews = reviews.map(review => ({
+      ...review,
+      product: {
+        ...review.product,
+        images: review.product.images ? JSON.parse(review.product.images) : []
+      }
+    }))
+
+    return NextResponse.json(processedReviews)
   } catch (error) {
     console.error('Error fetching reviews:', error)
     return NextResponse.json(
@@ -64,24 +57,33 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/reviews - Create new review (Authenticated users)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
-    const validatedData = reviewSchema.parse(body)
+    const { productId, rating, title, comment } = body
+
+    if (!productId || !rating || !comment) {
+      return NextResponse.json(
+        { error: 'Product ID, rating, and comment are required' },
+        { status: 400 }
+      )
+    }
+
+    if (rating < 1 || rating > 5) {
+      return NextResponse.json(
+        { error: 'Rating must be between 1 and 5' },
+        { status: 400 }
+      )
+    }
 
     // Check if product exists
     const product = await prisma.product.findUnique({
-      where: { id: validatedData.productId }
+      where: { id: productId }
     })
 
     if (!product) {
@@ -91,11 +93,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already reviewed this product
+    // Check if user has already reviewed this product
     const existingReview = await prisma.review.findFirst({
       where: {
-        productId: validatedData.productId,
-        userId: session.user.id
+        userId: session.user.id,
+        productId: productId
       }
     })
 
@@ -108,8 +110,12 @@ export async function POST(request: NextRequest) {
 
     const review = await prisma.review.create({
       data: {
-        ...validatedData,
-        userId: session.user.id
+        userId: session.user.id,
+        productId,
+        rating,
+        title,
+        comment,
+        verified: false // Reviews start as unverified
       },
       include: {
         user: {
@@ -123,7 +129,8 @@ export async function POST(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            slug: true
+            slug: true,
+            images: true
           }
         }
       }
@@ -131,13 +138,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(review, { status: 201 })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      )
-    }
-
     console.error('Error creating review:', error)
     return NextResponse.json(
       { error: 'Failed to create review' },
