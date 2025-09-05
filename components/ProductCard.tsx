@@ -4,10 +4,11 @@ import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, ArrowRight, Check, Leaf, Award, Shield, Heart, ShoppingCart, Zap } from "lucide-react"
+import { Star, ArrowRight, Check, Leaf, Award, Shield, Heart, ShoppingCart, Zap, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { formatINR } from "@/lib/currency"
+import { useToast } from "@/hooks/use-toast"
 
 interface Product {
   id: string
@@ -18,7 +19,8 @@ interface Product {
   rating: number
   reviewCount: number
   shortDescription: string
-  features: Array<{
+  features?: Array<{
+    id: string
     icon: string
     label: string
     description: string
@@ -26,8 +28,13 @@ interface Product {
   images: string[]
   inStock: boolean
   tags: string[]
-  category: string
+  category?: {
+    id: string
+    name: string
+    slug: string
+  }
   categoryName?: string
+  featured?: boolean
 }
 
 interface ProductCardProps {
@@ -37,6 +44,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { data: session } = useSession()
   const router = useRouter()
+  const { toast } = useToast()
+  
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
   const [isBuyingNow, setIsBuyingNow] = useState(false)
@@ -47,8 +56,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     : 0
 
   const getBadgeInfo = () => {
+    if (product.featured) return { text: "⭐ Featured", color: "bg-springz-green" }
     if (product.tags.includes("premium")) return { text: "🏆 Premium", color: "bg-springz-orange" }
-    if (product.tags.includes("featured")) return { text: "⭐ Featured", color: "bg-springz-green" }
     if (product.tags.includes("plant-based")) return { text: "🌿 Plant-Based", color: "bg-green-600" }
     if (product.tags.includes("traditional")) return { text: "🏛️ Traditional", color: "bg-orange-600" }
     if (product.tags.includes("spicy")) return { text: "🌶️ Spicy", color: "bg-red-600" }
@@ -69,17 +78,23 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   const handleAddToCart = async () => {
-    if (!product.inStock) return
+    if (!product.inStock) {
+      toast({
+        variant: "destructive",
+        title: "Out of Stock",
+        description: "This product is currently out of stock."
+      })
+      return
+    }
+
+    if (!session) {
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.href))
+      return
+    }
 
     setIsAddingToCart(true)
 
     try {
-      if (!session) {
-        // Redirect to login if not authenticated
-        router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.href))
-        return
-      }
-
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: {
@@ -93,31 +108,47 @@ export default function ProductCard({ product }: ProductCardProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to add to cart')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add to cart')
       }
 
       setJustAdded(true)
       setTimeout(() => setJustAdded(false), 2000)
+      
+      toast({
+        title: "Added to Cart!",
+        description: `${product.name} has been added to your cart.`,
+      })
     } catch (error) {
       console.error('Error adding to cart:', error)
-      alert('Failed to add product to cart')
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Failed to add product to cart'
+      })
     } finally {
       setIsAddingToCart(false)
     }
   }
 
   const handleBuyNow = async () => {
-    if (!product.inStock) return
+    if (!product.inStock) {
+      toast({
+        variant: "destructive",
+        title: "Out of Stock",
+        description: "This product is currently out of stock."
+      })
+      return
+    }
+
+    if (!session) {
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/product/${product.slug}`))
+      return
+    }
 
     setIsBuyingNow(true)
 
     try {
-      if (!session) {
-        // Redirect to login if not authenticated
-        router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/product/${product.slug}`))
-        return
-      }
-
       // Add to cart first
       const response = await fetch('/api/cart', {
         method: 'POST',
@@ -132,14 +163,19 @@ export default function ProductCard({ product }: ProductCardProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to add to cart')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add to cart')
       }
 
       // Redirect to checkout
       router.push('/checkout')
     } catch (error) {
       console.error('Error with buy now:', error)
-      alert('Failed to process buy now')
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Failed to process purchase'
+      })
     } finally {
       setIsBuyingNow(false)
     }
@@ -178,7 +214,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute bottom-6 right-6">
           <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1 shadow-lg">
             <Star className="h-4 w-4 text-springz-orange fill-current" />
-            <span className="text-sm font-bold text-gray-900">{product.rating}</span>
+            <span className="text-sm font-bold text-gray-900">{product.rating.toFixed(1)}</span>
           </div>
         </div>
       </div>
@@ -210,16 +246,27 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Features */}
-        <div className="flex flex-wrap gap-2">
-          {product.features.slice(0, 3).map((feature, index) => (
-            <div key={index} className="flex items-center space-x-1">
-              {getFeatureIcon(feature.icon, feature.label)}
-              <span className="bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs font-medium border border-gray-200">
-                {feature.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {product.features && product.features.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {product.features.slice(0, 3).map((feature, index) => (
+              <div key={feature.id || index} className="flex items-center space-x-1">
+                {getFeatureIcon(feature.icon, feature.label)}
+                <span className="bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs font-medium border border-gray-200">
+                  {feature.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Category tag if no features */}
+        {(!product.features || product.features.length === 0) && (
+          <div className="flex items-center space-x-2">
+            <span className="bg-springz-green/10 text-springz-green px-3 py-1 rounded-full text-xs font-medium">
+              {product.category?.name || product.categoryName || 'Product'}
+            </span>
+          </div>
+        )}
 
         {/* Pricing */}
         <div className="flex items-center justify-between">
@@ -243,7 +290,10 @@ export default function ProductCard({ product }: ProductCardProps) {
               onClick={handleBuyNow}
             >
               {isBuyingNow ? (
-                "Processing..."
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
               ) : (
                 "Buy Now"
               )}
@@ -260,7 +310,10 @@ export default function ProductCard({ product }: ProductCardProps) {
               onClick={handleAddToCart}
             >
               {isAddingToCart ? (
-                "Adding..."
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
               ) : justAdded ? (
                 <>
                   <Check className="mr-2 h-4 w-4" />

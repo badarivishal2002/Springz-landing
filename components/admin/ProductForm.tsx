@@ -101,34 +101,35 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
     formState: { errors },
     watch,
     setValue,
-    getValues
+    getValues,
+    reset
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: product?.name || "",
-      slug: product?.slug || "",
-      description: product?.description || "",
-      shortDescription: product?.shortDescription || "",
-      price: product?.price || 0,
-      originalPrice: product?.originalPrice,
-      categoryId: product?.categoryId || "",
-      servingSize: product?.servingSize || "",
-      protein: product?.protein || "",
-      calories: product?.calories || "",
-      fats: product?.fats || "",
-      carbs: product?.carbs || "",
-      sugar: product?.sugar || "",
-      ingredients: product?.ingredients || "",
-      tags: product?.tags || [],
-      inStock: product?.inStock ?? true,
-      featured: product?.featured ?? false,
-      images: product?.images || [],
-      sizes: product?.sizes || [],
-      features: product?.features || [],
-      nutritionFacts: product?.nutritionFacts || [],
-      howToUse: product?.howToUse || [],
-      sciencePoints: product?.sciencePoints || [],
-      faqs: product?.faqs || []
+      name: "",
+      slug: "",
+      description: "",
+      shortDescription: "",
+      price: 0,
+      originalPrice: undefined,
+      categoryId: "",
+      servingSize: "",
+      protein: "",
+      calories: "",
+      fats: "",
+      carbs: "",
+      sugar: "",
+      ingredients: "",
+      tags: [],
+      inStock: true,
+      featured: false,
+      images: [],
+      sizes: [],
+      features: [],
+      nutritionFacts: [],
+      howToUse: [],
+      sciencePoints: [],
+      faqs: []
     }
   })
 
@@ -167,6 +168,38 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
   useEffect(() => {
     fetchCategories()
   }, [])
+
+  // Load product data when editing
+  useEffect(() => {
+    if (product && isEditing) {
+      reset({
+        name: product.name || "",
+        slug: product.slug || "",
+        description: product.description || "",
+        shortDescription: product.shortDescription || "",
+        price: product.price || 0,
+        originalPrice: product.originalPrice,
+        categoryId: product.category?.id || product.categoryId || "",
+        servingSize: product.servingSize || "",
+        protein: product.protein || "",
+        calories: product.calories || "",
+        fats: product.fats || "",
+        carbs: product.carbs || "",
+        sugar: product.sugar || "",
+        ingredients: product.ingredients || "",
+        tags: product.tags || [],
+        inStock: product.inStock ?? true,
+        featured: product.featured ?? false,
+        images: product.images || [],
+        sizes: product.sizes || [],
+        features: product.features || [],
+        nutritionFacts: product.nutritionFacts || [],
+        howToUse: product.howToUse || [],
+        sciencePoints: product.sciencePoints || [],
+        faqs: product.faqs || []
+      })
+    }
+  }, [product, isEditing, reset])
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -267,6 +300,8 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
     setLoading(true)
     
     try {
+      console.log('Submitting product data:', data)
+      
       const url = isEditing ? `/api/products/${product.id}` : '/api/products'
       const method = isEditing ? 'PUT' : 'POST'
       
@@ -279,9 +314,12 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
       })
       
       if (response.ok) {
+        const result = await response.json()
+        console.log('Product saved successfully:', result)
         router.push('/admin/products')
       } else {
         const error = await response.json()
+        console.error('Failed to save product:', error)
         alert(error.error || 'Failed to save product')
       }
     } catch (error) {
@@ -409,7 +447,10 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
 
                 <div className="space-y-2">
                   <Label htmlFor="categoryId">Category *</Label>
-                  <Select onValueChange={(value) => setValue("categoryId", value)}>
+                  <Select 
+                    value={watch("categoryId")} 
+                    onValueChange={(value) => setValue("categoryId", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -444,7 +485,8 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="inStock"
-                    {...register("inStock")}
+                    checked={watch("inStock")}
+                    onCheckedChange={(checked) => setValue("inStock", checked)}
                   />
                   <Label htmlFor="inStock">In Stock</Label>
                 </div>
@@ -452,7 +494,8 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="featured"
-                    {...register("featured")}
+                    checked={watch("featured")}
+                    onCheckedChange={(checked) => setValue("featured", checked)}
                   />
                   <Label htmlFor="featured">Featured Product</Label>
                 </div>
@@ -718,7 +761,10 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
                 <div key={field.id} className="grid grid-cols-3 gap-4 items-end">
                   <div className="space-y-2">
                     <Label>Icon</Label>
-                    <Select onValueChange={(value) => setValue(`features.${index}.icon`, value)}>
+                    <Select 
+                      value={watch(`features.${index}.icon`)} 
+                      onValueChange={(value) => setValue(`features.${index}.icon`, value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select icon" />
                       </SelectTrigger>
@@ -810,7 +856,10 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
                     />
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Switch {...register(`sizes.${index}.available`)} />
+                    <Switch 
+                      checked={watch(`sizes.${index}.available`)} 
+                      onCheckedChange={(checked) => setValue(`sizes.${index}.available`, checked)} 
+                    />
                     <Label>Available</Label>
                     <Button
                       type="button"

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -11,12 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Menu, X, User, LogOut, Settings, Package, ShoppingBag, Phone } from "lucide-react"
+import { Menu, X, User, LogOut, Settings, Package, ShoppingBag, Phone, Crown, Shield } from "lucide-react"
 import CartDrawer from "./CartDrawer"
 import { useAuth } from "@/hooks/useAuth"
 
 export default function Header() {
+  const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   const { user, logout } = useAuth()
 
   const navigation = [
@@ -26,8 +29,35 @@ export default function Header() {
     { name: "Contact", href: "/contact" },
   ]
 
+  // Load cart count when user is authenticated
+  useEffect(() => {
+    if (session) {
+      loadCartCount()
+    } else {
+      setCartCount(0)
+    }
+  }, [session])
+
+  const loadCartCount = async () => {
+    try {
+      const response = await fetch('/api/cart')
+      if (response.ok) {
+        const cartData = await response.json()
+        setCartCount(cartData.summary.itemCount || 0)
+      }
+    } catch (error) {
+      console.error('Error loading cart count:', error)
+    }
+  }
+
+  // Function to update cart count from child components
+  const updateCartCount = (count: number) => {
+    setCartCount(count)
+  }
+
   const handleLogout = async () => {
     await logout()
+    setCartCount(0) // Clear cart count on logout
     window.location.href = "/"
   }
 
@@ -77,9 +107,18 @@ export default function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
-              {/* Cart */}
+              {/* Cart with count */}
               <div className="relative">
-                <CartDrawer />
+                <CartDrawer onCartUpdate={updateCartCount}>
+                  <Button variant="ghost" size="sm" className="relative p-2 hover:bg-springz-green/10 hover:text-springz-green">
+                    <ShoppingBag className="h-5 w-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-springz-orange text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
+                  </Button>
+                </CartDrawer>
               </div>
 
               {user ? (
@@ -91,29 +130,63 @@ export default function Header() {
                       className="flex items-center gap-3 hover:bg-springz-green/10 px-4 py-2 rounded-full"
                     >
                       <div className="w-8 h-8 bg-springz-green rounded-full flex items-center justify-center text-white font-semibold">
-                        {user.firstName[0]}
+                        {user.firstName?.[0] || user.name?.[0] || 'U'}
                       </div>
-                      <span className="font-medium text-gray-700">{user.firstName}</span>
+                      <span className="font-medium text-gray-700 flex items-center gap-1">
+                        {user.firstName || user.name || 'User'}
+                        {user.role === "ADMIN" && (
+                          <Crown className="h-4 w-4 text-yellow-500" title="Administrator" />
+                        )}
+                      </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64 p-2 bg-white border-springz-green/20">
                     <div className="px-3 py-2 bg-springz-cream rounded-lg mb-2">
-                      <p className="font-semibold text-gray-900">
-                        {user.firstName} {user.lastName}
+                      <p className="font-semibold text-gray-900 flex items-center gap-2">
+                        {user.firstName && user.lastName 
+                          ? `${user.firstName} ${user.lastName}`
+                          : user.name || 'User'
+                        }
+                        {user.role === "ADMIN" && (
+                          <Crown className="h-4 w-4 text-yellow-500" title="Administrator" />
+                        )}
                       </p>
                       <p className="text-sm text-gray-600">{user.email}</p>
-                      {user.role === "admin" && (
-                        <p className="text-xs text-springz-orange font-medium">Administrator</p>
+                      {user.role === "ADMIN" && (
+                        <p className="text-xs text-blue-600 font-medium">Administrator</p>
                       )}
                     </div>
-                    <DropdownMenuItem className="flex items-center py-3 hover:bg-springz-green/10">
-                      <Package className="mr-3 h-5 w-5 text-springz-green" />
-                      <span>My Orders</span>
-                    </DropdownMenuItem>
+                    
+                    <Link href="/profile">
+                      <DropdownMenuItem className="flex items-center py-3 hover:bg-springz-green/10">
+                        <User className="mr-3 h-5 w-5 text-springz-green" />
+                        <span>My Profile</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    
+                    <Link href="/orders">
+                      <DropdownMenuItem className="flex items-center py-3 hover:bg-springz-green/10">
+                        <Package className="mr-3 h-5 w-5 text-springz-green" />
+                        <span>My Orders</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    
                     <DropdownMenuItem className="flex items-center py-3 hover:bg-springz-green/10">
                       <Settings className="mr-3 h-5 w-5 text-springz-green" />
                       <span>Account Settings</span>
                     </DropdownMenuItem>
+                    
+                    {user.role === "ADMIN" && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <Link href="/admin">
+                          <DropdownMenuItem className="flex items-center py-3 hover:bg-blue-50 text-blue-600">
+                            <Shield className="mr-3 h-5 w-5" />
+                            <span>Admin Dashboard</span>
+                          </DropdownMenuItem>
+                        </Link>
+                      </>
+                    )}
                     
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
@@ -150,7 +223,16 @@ export default function Header() {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-4">
-              <CartDrawer />
+              <CartDrawer onCartUpdate={updateCartCount}>
+                <Button variant="ghost" size="sm" className="relative p-2">
+                  <ShoppingBag className="h-5 w-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-springz-orange text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </Button>
+              </CartDrawer>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -186,23 +268,45 @@ export default function Header() {
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3 p-3 bg-springz-cream rounded-lg">
                         <div className="w-10 h-10 bg-springz-green rounded-full flex items-center justify-center text-white font-semibold">
-                          {user.firstName[0]}
+                          {user.firstName?.[0] || user.name?.[0] || 'U'}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">
-                            {user.firstName} {user.lastName}
+                          <p className="font-semibold text-gray-900 flex items-center gap-1">
+                            {user.firstName && user.lastName 
+                              ? `${user.firstName} ${user.lastName}`
+                              : user.name || 'User'
+                            }
+                            {user.role === "ADMIN" && (
+                              <Crown className="h-4 w-4 text-yellow-500" />
+                            )}
                           </p>
                           <p className="text-sm text-gray-600">{user.email}</p>
-                          {user.role === "admin" && (
-                            <p className="text-xs text-springz-orange font-medium">Administrator</p>
+                          {user.role === "ADMIN" && (
+                            <p className="text-xs text-blue-600 font-medium">Administrator</p>
                           )}
                         </div>
                       </div>
+                      
+                      <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="ghost" size="sm" className="w-full justify-start hover:bg-springz-green/10">
+                          <User className="mr-3 h-5 w-5 text-springz-green" />
+                          My Profile
+                        </Button>
+                      </Link>
                       
                       <Button variant="ghost" size="sm" className="w-full justify-start hover:bg-springz-green/10">
                         <Package className="mr-3 h-5 w-5 text-springz-green" />
                         My Orders
                       </Button>
+
+                      {user.role === "ADMIN" && (
+                        <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
+                          <Button variant="ghost" size="sm" className="w-full justify-start hover:bg-blue-50 text-blue-600">
+                            <Shield className="mr-3 h-5 w-5" />
+                            Admin Dashboard
+                          </Button>
+                        </Link>
+                      )}
                       
                       <Button
                         variant="ghost"
@@ -216,7 +320,7 @@ export default function Header() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <Link href="/auth/signin" className="block">
+                      <Link href="/auth/signin" className="block" onClick={() => setIsMenuOpen(false)}>
                         <Button 
                           variant="ghost" 
                           size="lg" 
@@ -225,7 +329,7 @@ export default function Header() {
                           Sign In
                         </Button>
                       </Link>
-                      <Link href="/auth/signup" className="block">
+                      <Link href="/auth/signup" className="block" onClick={() => setIsMenuOpen(false)}>
                         <Button 
                           size="lg" 
                           className="w-full bg-springz-green hover:bg-springz-green/90 text-white"

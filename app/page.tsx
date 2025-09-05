@@ -214,18 +214,26 @@ export default function HomePage() {
 
             {/* Filter Tags */}
             <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
-                High Protein
-              </Button>
-              <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
-                Plant Based
-              </Button>
-              <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
-                Traditional
-              </Button>
-              <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
-                Premium Quality
-              </Button>
+              <Link href="/shop?filter=high-protein">
+                <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
+                  High Protein
+                </Button>
+              </Link>
+              <Link href="/shop?filter=plant-based">
+                <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
+                  Plant Based
+                </Button>
+              </Link>
+              <Link href="/shop?filter=traditional">
+                <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
+                  Traditional
+                </Button>
+              </Link>
+              <Link href="/shop?filter=premium">
+                <Button variant="outline" className="bg-white border-springz-green/20 text-gray-700 hover:bg-springz-green hover:text-white rounded-full px-6 py-2 transition-all">
+                  Premium Quality
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -311,7 +319,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Products Section - Real Data */}
+        {/* Featured Products Section - Using Unified ProductCard Component */}
         <section className="py-20 bg-springz-cream">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-12">
@@ -322,58 +330,17 @@ export default function HomePage() {
               <Link href="/shop">
                 <Button variant="outline" className="text-gray-700 border-gray-300 hover:bg-gray-50 rounded-lg px-6">
                   View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
 
             {data.featuredProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {/* Using the same ProductCard component as shop page for consistency */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   {data.featuredProducts.map((product) => (
-                    <div key={product.id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
-                      <div className="relative">
-                        <img
-                          src={product.images[0] || "/placeholder-wsy0q.png"}
-                          alt={product.name}
-                          className="w-full h-48 object-cover"
-                        />
-                        {product.originalPrice && (
-                          <div className="absolute top-3 left-3 bg-springz-orange text-white px-2 py-1 rounded-full text-xs font-bold">
-                            Save {formatINR(product.originalPrice - product.price)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4 space-y-3">
-                        <div>
-                          <h3 className="font-bold text-lg text-gray-900 line-clamp-2">{product.name}</h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">{product.shortDescription}</p>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <div className="flex text-springz-orange">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star key={i} className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-300'}`} />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-600">({product.reviewCount})</span>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-xl text-springz-green">{formatINR(product.price)}</span>
-                            {product.originalPrice && (
-                              <span className="text-sm text-gray-500 line-through">{formatINR(product.originalPrice)}</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <Link href={`/product/${product.slug}`}>
-                          <Button className="w-full bg-springz-green hover:bg-springz-green/90 text-white rounded-lg">
-                            View Product
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
+                    <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
 
@@ -396,8 +363,63 @@ export default function HomePage() {
                 <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No Featured Products</h3>
                 <p className="text-gray-600">Check back soon for our featured product selections.</p>
+                <Link href="/shop" className="inline-block mt-4">
+                  <Button className="bg-springz-green hover:bg-springz-green/90">
+                    Browse All Products
+                  </Button>
+                </Link>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Product Benefits Section */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="font-bold text-4xl text-gray-900 mb-4">Why Choose Springz?</h2>
+              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                We're committed to delivering the highest quality nutrition products with complete transparency.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="border-0 bg-gray-50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-springz-green rounded-full flex items-center justify-center mx-auto">
+                    <TestTube className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-xl text-gray-900">Lab Tested Quality</h3>
+                  <p className="text-gray-600">
+                    Every batch is third-party tested for purity, potency, and safety to ensure premium quality.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 bg-gray-50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-springz-green rounded-full flex items-center justify-center mx-auto">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-xl text-gray-900">30-Day Guarantee</h3>
+                  <p className="text-gray-600">
+                    Not satisfied? Return any unopened products within 30 days for a full refund.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 bg-gray-50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-springz-green rounded-full flex items-center justify-center mx-auto">
+                    <Truck className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-xl text-gray-900">Free Shipping</h3>
+                  <p className="text-gray-600">
+                    Free shipping on all orders over ₹2,000. Fast delivery within 3-5 business days.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
       </main>
