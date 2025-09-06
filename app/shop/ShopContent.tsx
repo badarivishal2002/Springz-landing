@@ -1,12 +1,12 @@
 "use client"
 
 import { Suspense } from "react"
-import ShopContent from "./ShopContent"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { Loader2 } from "lucide-react"
+import ShopContentWithSearchParams from "./ShopContentWithSearchParams"
 
-function ShopFallback() {
+function ShopLoadingFallback() {
   return (
     <div className="min-h-screen">
       <Header />
@@ -21,10 +21,10 @@ function ShopFallback() {
   )
 }
 
-export default function ShopPage() {
+export default function ShopContent() {
   return (
-    <Suspense fallback={<ShopFallback />}>
-      <ShopContent />
+    <Suspense fallback={<ShopLoadingFallback />}>
+      <ShopContentWithSearchParams />
     </Suspense>
   )
 }
