@@ -20,14 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { 
   Users, 
   Search, 
@@ -36,16 +28,10 @@ import {
   UserX,
   Mail,
   Phone,
-  Calendar,
-  MoreHorizontal,
-  Edit,
-  Crown,
-  Shield,
-  Eye
+  Calendar
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Link from "next/link"
 
 interface User {
   id: string
@@ -90,43 +76,6 @@ export default function UsersPage() {
     }
   }
 
-  const handleRoleChange = async (userId: string, newRole: 'ADMIN' | 'CUSTOMER') => {
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/role`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: newRole }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: data.error || "Failed to update user role"
-        })
-        return
-      }
-
-      toast({
-        title: "Success",
-        description: `User role updated to ${newRole}`,
-      })
-
-      // Refresh users list
-      await fetchUsers()
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update user role"
-      })
-    }
-  }
-
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -143,14 +92,10 @@ export default function UsersPage() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase()
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-springz-green"></div>
       </div>
     )
   }
@@ -289,7 +234,6 @@ export default function UsersPage() {
                   <TableHead>Role</TableHead>
                   <TableHead>Activity</TableHead>
                   <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -302,12 +246,7 @@ export default function UsersPage() {
                           <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium flex items-center gap-2">
-                            {user.name || 'Unnamed User'}
-                            {user.role === 'ADMIN' && (
-                              <Crown className="h-4 w-4 text-yellow-500" title="Administrator" />
-                            )}
-                          </div>
+                          <div className="font-medium">{user.name || 'Unnamed User'}</div>
                           <div className="text-sm text-muted-foreground">ID: {user.id.slice(0, 8)}...</div>
                         </div>
                       </div>
@@ -343,46 +282,8 @@ export default function UsersPage() {
                     
                     <TableCell>
                       <div className="text-sm text-muted-foreground">
-                        {formatDate(user.createdAt)}
+                        {new Date(user.createdAt).toLocaleDateString()}
                       </div>
-                    </TableCell>
-                    
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <Link href={`/admin/users/${user.id}`}>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit User
-                            </DropdownMenuItem>
-                          </Link>
-                          <DropdownMenuSeparator />
-                          {user.role === 'CUSTOMER' ? (
-                            <DropdownMenuItem
-                              onClick={() => handleRoleChange(user.id, 'ADMIN')}
-                              className="text-blue-600"
-                            >
-                              <Crown className="mr-2 h-4 w-4" />
-                              Make Admin
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem
-                              onClick={() => handleRoleChange(user.id, 'CUSTOMER')}
-                              className="text-gray-600"
-                            >
-                              <Shield className="mr-2 h-4 w-4" />
-                              Remove Admin
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

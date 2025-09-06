@@ -16,15 +16,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Profile routes - require authentication
-  if (pathname.startsWith('/profile')) {
-    if (!token) {
-      return NextResponse.redirect(
-        new URL('/auth/signin?callbackUrl=' + encodeURIComponent(pathname), request.url)
-      )
-    }
-  }
-
   // Admin routes protection
   if (pathname.startsWith('/admin')) {
     if (!token) {
@@ -45,7 +36,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/profile/:path*',
     '/auth/:path*'
   ]
 }
