@@ -1,9 +1,9 @@
 "use client"
 
 import { Suspense } from "react"
-import SignUpForm from "./SignUpForm"
+import ResetPasswordForm from "./ResetPasswordForm"
 
-function SignUpFallback() {
+function ResetPasswordFallback() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -16,10 +16,10 @@ function SignUpFallback() {
   )
 }
 
-export default function SignUpPage() {
+export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<SignUpFallback />}>
-      <SignUpForm />
+    <Suspense fallback={<ResetPasswordFallback />}>
+      <ResetPasswordForm />
     </Suspense>
   )
 }
