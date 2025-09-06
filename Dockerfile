@@ -17,34 +17,13 @@ COPY package.json package-lock.json* pnpm-lock.yaml* ./
 
 # Install dependencies based on available lock file
 RUN \
-  if [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
-
-# ================================
-# Stage 2: Production Dependencies
-# ================================
-FROM node:18-alpine AS prod-deps
-
-# Install libc6-compat for Alpine compatibility
-RUN apk add --no-cache libc6-compat
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files
-COPY package.json package-lock.json* pnpm-lock.yaml* ./
-
-# Install only production dependencies
-RUN \
-  if [ -f package-lock.json ]; then npm ci --omit=dev; \
+  if [ -f package-lock.json ]; then npm ci --only=production; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile --prod; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
 # ================================
-# Stage 3: Builder
+# Stage 2: Builder
 # ================================
 FROM node:18-alpine AS builder
 
@@ -60,8 +39,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Copy environment file for build (if exists)
-COPY .env* .env*
-RUN if [ ! -f ".env" ] && [ -f ".env" ]; then cp .env .env; fi
+COPY .env.example .env
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -80,7 +58,7 @@ RUN \
   fi
 
 # ================================
-# Stage 4: Runner (Production)
+# Stage 3: Runner (Production)
 # ================================
 FROM node:18-alpine AS runner
 
@@ -98,9 +76,6 @@ ENV PORT=8080
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy production dependencies
-COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-
 # Copy public assets
 COPY --from=builder /app/public ./public
 
@@ -112,9 +87,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-
-# Copy package.json for Prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 # Create a startup script for Prisma migrations
 COPY --chown=nextjs:nodejs <<EOF /app/start.sh

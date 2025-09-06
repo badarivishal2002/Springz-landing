@@ -19,7 +19,7 @@ yarn-error.log*
 out/
 build/
 
-# Environment files (except .env)
+# Environment files (except .env.example)
 .env
 .env.local
 .env.development.local

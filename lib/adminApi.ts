@@ -112,11 +112,7 @@ export const adminApi = {
   async getProducts(): Promise<ApiResponse<Product[]>> {
     await delay(400)
     try {
-      const response = await fetch('/api/products')
-      if (!response.ok) {
-        throw new Error('Failed to fetch products')
-      }
-      const products = await response.json()
+      const products = await import("../data/products").then((m) => m.products)
       return { success: true, data: products }
     } catch (error) {
       return { success: false, error: "Failed to fetch products" }
@@ -135,15 +131,12 @@ export const adminApi = {
   async updateProduct(id: string, updates: Partial<Product>): Promise<ApiResponse<Product>> {
     await delay(600)
     try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      })
-      if (!response.ok) {
-        throw new Error('Failed to update product')
+      const products = await import("../data/products").then((m) => m.products)
+      const product = products.find((p) => p.id === id)
+      if (!product) {
+        return { success: false, error: "Product not found" }
       }
-      const updatedProduct = await response.json()
+      const updatedProduct = { ...product, ...updates }
       return { success: true, data: updatedProduct }
     } catch (error) {
       return { success: false, error: "Failed to update product" }
