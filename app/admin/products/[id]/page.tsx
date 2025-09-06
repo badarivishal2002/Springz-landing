@@ -23,30 +23,20 @@ export default function EditProductPage() {
   const fetchProduct = async () => {
     try {
       setLoading(true)
-      console.log('Fetching product with ID:', params.id)
-      
       const response = await fetch(`/api/products/${params.id}`)
-      
-      console.log('API Response status:', response.status)
-      console.log('API Response ok:', response.ok)
       
       if (!response.ok) {
         if (response.status === 404) {
-          console.error('Product not found')
           setError("Product not found")
         } else {
-          const errorText = await response.text()
-          console.error('API Error:', errorText)
           throw new Error("Failed to fetch product")
         }
         return
       }
       
       const data = await response.json()
-      console.log('Product data received:', data)
       setProduct(data)
     } catch (err) {
-      console.error('Fetch error:', err)
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
       setLoading(false)

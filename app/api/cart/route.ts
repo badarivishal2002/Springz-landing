@@ -104,10 +104,7 @@ export async function POST(request: NextRequest) {
 
     // Verify product exists and is in stock
     const product = await prisma.product.findUnique({
-      where: { id: productId },
-      include: {
-        sizes: true
-      }
+      where: { id: productId }
     })
 
     if (!product) {
@@ -124,23 +121,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Handle size: use first available size if none provided
-    let finalSize = size
-    if (!finalSize && product.sizes && product.sizes.length > 0) {
-      finalSize = product.sizes[0].size
-    }
-    // If still no size, use default
-    if (!finalSize) {
-      finalSize = 'Default'
-    }
-
     // Check if item already exists in cart
     const existingCartItem = await prisma.cartItem.findUnique({
       where: {
         userId_productId_size: {
           userId: session.user.id,
           productId: productId,
-          size: finalSize
+          size: size
         }
       }
     })
@@ -169,7 +156,7 @@ export async function POST(request: NextRequest) {
           userId: session.user.id,
           productId: productId,
           quantity: quantity,
-          size: finalSize
+          size: size
         },
         include: {
           product: {

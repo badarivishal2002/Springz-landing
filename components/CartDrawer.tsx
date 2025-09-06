@@ -13,7 +13,6 @@ import { formatINR } from "@/lib/currency"
 
 interface CartDrawerProps {
   children?: React.ReactNode
-  onCartUpdate?: (count: number) => void
 }
 
 interface CartItem {
@@ -50,7 +49,7 @@ interface Cart {
   summary: CartSummary
 }
 
-export default function CartDrawer({ children, onCartUpdate }: CartDrawerProps) {
+export default function CartDrawer({ children }: CartDrawerProps) {
   const { data: session, status } = useSession()
   const [cart, setCart] = useState<Cart | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -63,13 +62,6 @@ export default function CartDrawer({ children, onCartUpdate }: CartDrawerProps) 
       loadCart()
     }
   }, [isOpen, session])
-
-  // Update parent component when cart changes
-  useEffect(() => {
-    if (onCartUpdate && cart) {
-      onCartUpdate(cart.summary.itemCount || 0)
-    }
-  }, [cart, onCartUpdate])
 
   const loadCart = async () => {
     if (!session) return

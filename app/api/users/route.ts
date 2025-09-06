@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/admin-auth'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/users - Get all users (Admin only)
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin()
+    const session = await getServerSession(authOptions)
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const users = await prisma.user.findMany({
       select: {
@@ -16,7 +19,6 @@ export async function GET(request: NextRequest) {
         role: true,
         phone: true,
         createdAt: true,
-        updatedAt: true,
         _count: {
           select: {
             orders: true,
@@ -31,13 +33,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(users)
   } catch (error) {
-    if (error instanceof Error && (error.message.includes('Authentication') || error.message.includes('Admin'))) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message.includes('Admin') ? 403 : 401 }
-      )
-    }
-
     console.error('Error fetching users:', error)
     return NextResponse.json(
       { error: 'Failed to fetch users' },

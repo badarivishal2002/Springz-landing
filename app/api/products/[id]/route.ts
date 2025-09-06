@@ -9,12 +9,7 @@ export async function GET(
 ) {
   try {
     // Check if id is a slug or actual id
-    // Prisma CUID format: starts with 'c' and is 25 characters long
-    // Slugs are typically shorter and contain hyphens
-    const isSlug = params.id.includes('-') || params.id.length < 20
-    
-    console.log('API Route - Received ID:', params.id)
-    console.log('API Route - Treating as:', isSlug ? 'slug' : 'id')
+    const isSlug = !params.id.startsWith('cl') // Prisma cuid starts with 'cl'
     
     const product = await prisma.product.findUnique({
       where: isSlug ? { slug: params.id } : { id: params.id },
@@ -44,8 +39,6 @@ export async function GET(
         }
       }
     })
-
-    console.log('API Route - Product found:', !!product)
 
     if (!product) {
       return NextResponse.json(
@@ -86,9 +79,6 @@ export async function PUT(
     await requireAdmin()
 
     const body = await request.json()
-    
-    console.log('PUT - Updating product ID:', params.id)
-    console.log('PUT - Update data:', body)
     
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
@@ -197,8 +187,6 @@ export async function DELETE(
 ) {
   try {
     await requireAdmin()
-
-    console.log('DELETE - Deleting product ID:', params.id)
 
     // Check if product exists
     const product = await prisma.product.findUnique({
