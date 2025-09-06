@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import CheckoutSuccessPageClient from "./CheckoutSuccessPageClient"
@@ -13,9 +12,7 @@ export default function CheckoutSuccessPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <Suspense fallback={<div className="flex justify-center items-center py-16">Loading...</div>}>
-        <CheckoutSuccessPageClient />
-      </Suspense>
+      <CheckoutSuccessPageClient />
       <Footer />
     </div>
   )
